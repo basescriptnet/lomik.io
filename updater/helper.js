@@ -1,9 +1,8 @@
-let Tank = require('../tank');
 let classes = require('../classes');
-let createClass = name => {
-    let t = new Tank(0, 0).simplify;
-    classes.call(t, name, t);
-    return t;
+let createClass = className => {
+    let tank = new Tank(0, 0).simplify;
+    classes.call(tank, className, tank);
+    return tank;
 };
 
 let classStructure = {
@@ -78,6 +77,7 @@ function isOutOfBox(obj) {
 }
 
 function updateLevel(player) {
+    // 2 is the number of levels required each time to get a new upgrade
     if (player.level > player.classPath.length * 2) {
         player.availableClasses = {};
         let tmp = classStructure;
@@ -87,7 +87,7 @@ function updateLevel(player) {
         for (let i in tmp) {
             player.availableClasses[i] = createClass(i);
         }
-    } else player.availableClasses = [];
+    } else player.availableClasses = {};
 }
 
 function regen(obj) {

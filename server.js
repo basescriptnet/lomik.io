@@ -1,19 +1,49 @@
-// require
+// express and socket.io init
 let express = require('express');
-const classes = require('./classes');
 let app = express();
 let server = require('http').createServer(app);
 global.io = require('socket.io')(server);
-require('./updater');
+
+// require
 require('./globals');
+require('./updater');
+const classes = require('./classes');
+let { checkCells, checkPlayers, checkEnemies } = require('./entities');
+const modeInterval = {
+    easy: {
+        firstNight: 10e3,
+        whenBoss: 30e3,
+        regular: 20e3
+    },
+    normal: {
+        firstNight: 10e3,
+        whenBoss: 30e3,
+        regular: 20e3
+    },
+    hard: {
+        firstNight: 10e3,
+        whenBoss: 30e3,
+        regular: 20e3
+    },
+    crazy: {
+        firstNight: 10e3,
+        whenBoss: 30e3,
+        regular: 20e3
+    },
+    impossible: {
+        firstNight: 60e3,
+        whenBoss: 45e3,
+        regular: 45e3
+    }
+};
+
+let drop = {lastDropped: 0};
 
 // global reusable variables and functions
 let intervalId = null;
 let nightInterval = null;
 let isGameOver = false;
 
-let entities = require('./entities');
-// global.io = socketio(server);
 let reset = () => {
     isNight = false;
     castle = new Castle();
@@ -25,10 +55,13 @@ let reset = () => {
     }
     cells = [];
     enemies = [];
+
+    Geometry.prototype.createCell('any', 20, true);
+
     let enemyAmount = 1;
-    for (let i = 0; i < 20; i++) {
-        cells.push(Geometry.prototype.createCell());
-    }
+
+
+
     nightInterval = setInterval(() => {
         isNight = !isNight;
         if (!isNight) return; 
@@ -65,11 +98,11 @@ let reset = () => {
             // let boss = new Enemy(true);
             // if (n <= 4) {
             //     enemyClass = 'sniper';
-            // }else if (n >= 4 && n <= 6) {
+            // } else if (n >= 4 && n <= 6) {
             //     enemyClass = 'flankguard';
-            // }else if (n >= 6 && n <= 8) {
+            // } else if (n >= 6 && n <= 8) {
             //     enemyClass = 'twin';
-            // }else if (n >= 8 && n <= 10) {
+            // } else if (n >= 8 && n <= 10) {
             //     enemyClass = 'machineGun';
             // }
             classes.call(enemy, enemyClass, enemy);
@@ -78,9 +111,7 @@ let reset = () => {
             enemies.push(enemy);
             // enemies.push(boss);
         }
-        for (let i = 0; i < playersLength*3; i++) {
-            cells.push(Geometry.prototype.createCell('attacker'));
-        }
+        Geometry.prototype.createCell('attacker', playersLength*3, true);
     }, 10e3);
     castle.aliveFrom = Date.now();
     castle.dead = false;
@@ -109,10 +140,10 @@ io.on('connection', sock => {
             // gets lightweight variant of players object, so you can update it faster
             let updatedPlayers;
             try { // navsyaki, or awibka tta serv0
-                updatedPlayers = entities.checkPlayers();
+                updatedPlayers = checkPlayers();
                 // enemies
-                entities.checkEnemies();
-                entities.checkCells();
+                checkEnemies();
+                checkCells();
                 collision.castleCollision();
                 if (castle.health <= 0) {
                     isGameOver = true;
@@ -125,8 +156,8 @@ io.on('connection', sock => {
                 }
                 regen(castle);
 
-                if (!isNight) opacity -= .6 / 5 / 60;
-                else opacity += .6 / 5 / 60;
+                if (!isNight) opacity -= 0.02;
+                else opacity += 0.02;
                 if (opacity > .6) opacity = .6;
                 else if (opacity < 0) opacity = 0;
 
@@ -166,9 +197,9 @@ io.on('connection', sock => {
         let player = players[sock.id];
         if (!player) return;
         player.score += 1000;
-        player.level++;
-        updateLevel(player);
+        // player.level++;
         updateScore(player);
+        updateLevel(player);
     });
 
     sock.on('changeTank', function (n) {
@@ -198,7 +229,7 @@ io.on('connection', sock => {
         }
         else {
             let updatedPlayer = players[obj.id];
-            
+
             if (typeof obj.property === 'string')
                 updatedPlayer[obj.property] = obj.value;
             else if (obj.props) {

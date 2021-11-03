@@ -26,5 +26,8 @@
   "bugs": {
     "url": "https://github.com/javascriptIsEverything/lomik.io/issues"
   },
-  "homepage": "https://github.com/javascriptIsEverything/lomik.io#readme"
+  "homepage": "https://github.com/javascriptIsEverything/lomik.io#readme",
+  "devDependencies": {
+    "@types/socket.io": "^3.0.2"
+  }
 }

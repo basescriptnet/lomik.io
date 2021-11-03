@@ -1,5 +1,3 @@
-let gameover = false;
-
 // function RectCircleColliding(circle, rect) {
 //     let distX = Math.abs(circle.x - rect.x-rect.r);
 //     let distY = Math.abs(circle.y - rect.y-rect.r);
@@ -27,22 +25,25 @@ function CircularCollision(circle1, circle2) {
 
 global.updateScore = function (obj, cellType) {
     let score = 0;
-    switch (cellType) {
-        case 'square':
-            score = 10;
-            break;
-        case 'triangle':
-        case 'attacker':
-            score = 15;
-            break;
-        case 'pentagon':
-            score = 130;
-            break;
-        case 'hexagon':
-        case 'enemy':
-            score = 250;
-            break;
+    if (cellType) {
+        switch (cellType) {
+            case 'square':
+                score = 10;
+                break;
+            case 'triangle':
+            case 'attacker':
+                score = 15;
+                break;
+            case 'pentagon':
+                score = 130;
+                break;
+            case 'hexagon':
+            case 'enemy':
+                score = 250;
+                break;
+        }
     }
+    // ? fix it! levels are not updated. Classes are not available
     obj.score += score;
 
     let levels = obj.levelSettings;
@@ -64,10 +65,10 @@ global.updateScore = function (obj, cellType) {
 module.exports = {
     bulletCollision (obj, cells) {
         if (!obj) return;
+        if (obj.isEnemy && cells && cells[0]?.isEnemy) return;
         for (let i = 0, len = obj.bullets.length; i < len; i++) {
             let bullet = obj.bullets[i];
-            // for (let j = 0, len = cells.length;  j < len; j++) {
-            for (let j in cells) {
+            for (let j in cells) { // this makes sure, that objects are parsed as well
                 let cell = cells[j];
                 if (!cell) continue;
                 if (cell.dead) continue;
@@ -79,13 +80,21 @@ module.exports = {
                     cell.health -= obj.bulletDamage;
                     if (cell.health <= 0) {
                         cell.dead = true;
-                        if (cells.length) {
+                        if (cell.isEnemy) {
+                            updateScore(obj, cell.type);
+                        } else if (cell.isPlayer) { // player
+                            cell.lastDamaged = now;
+                            io.emit('update', {objects: {
+                                seconds: now + 5e3,
+                                player: cell.simplify
+                            }});
+                        } else if (cells.length) {
                             setTimeout(() => {
-                                cells.push(Geometry.prototype.createCell());
+                                Geometry.prototype.createCell('any', 1, true);
                             }, 3000);
                             updateScore(obj, cell.type);
-                            return;
                         }
+                        return;
                     }
                     else cell.lastDamaged = now;
                     let vx, vy;
@@ -152,6 +161,7 @@ module.exports = {
         }
     },
     bodyCollision (obj, cells) {
+        if (obj.isEnemy && cells && cells[0]?.isEnemy) return;
         // for (let i = 0, len = cells.length;  i < len; i++) {
         for (let i in cells) {
             let cell = cells[i];
@@ -162,16 +172,25 @@ module.exports = {
                 if (obj.health <= 0)
                     obj.dead = true;
                 else obj.lastDamaged = now;
-                    cell.health -= obj.bodyDamage;
+
+                cell.health -= obj.bodyDamage;
                 if (cell.health <= 0) {
                     cell.dead = true;
-                    if (cells.length) {
+                    if (cell.isEnemy) {
+                        updateScore(obj, cell.type);
+                    } else if (cell.isPlayer) { // player
+                        cell.lastDamaged = now;
+                        io.emit('update', {objects: {
+                            seconds: now + 5e3,
+                            player: cell.simplify
+                        }});
+                    } else if (cells.length) {
                         setTimeout(() => {
-                            cells.push(Geometry.prototype.createCell());
+                            Geometry.prototype.createCell('any', 1, true);
                         }, 3000);
                         updateScore(obj, cell.type);
-                        return;
                     }
+                    return;
                 }
                 else cell.lastDamaged = now;
                 let vx, vy;
@@ -205,7 +224,7 @@ module.exports = {
                 obj.health -= enemy.bodyDamage;
                 if (obj.health <= 0) {
                     obj.dead = true;
-                    console.log('dead by body damage')
+                    // console.log('dead by body damage')
                 }
                 else obj.lastDamaged = now;
                 enemy.health -= obj.bodyDamage;
@@ -254,12 +273,15 @@ module.exports = {
                 castle.health -= enemy.bodyDamage;
                 if (castle.health <= 0) {
                     castle.dead = true;
-                    castle.lastedUntill = now;
+                    castle.lastedUntil = now;
                 }
                 else castle.lastDamaged = now;
                 enemy.health -= castle.bodyDamage;
                 if (enemy.health <= 0) {
-                    enemy.dead = true;
+                    // enemy.dead = true;
+                    enemies.splice(i, 1);
+                    i--;
+                    len--;
                 }
                 else enemy.lastDamaged = now;
             }

@@ -1,6 +1,8 @@
 global.Enemy = class Enemy extends Tank {
     constructor (boss = false) {
         super();
+        this.isPlayer = false;
+        this.isEnemy = true;
         this.className = 'twin';
         this.reloadDelay = 1000; // default
         // this.maxHealth = this.health = this.maxHealth * 3;
@@ -65,8 +67,8 @@ global.Enemy = class Enemy extends Tank {
         if (!this.cell || this.cell.dead)
             this.cell = this.closestPlayer;
         if (!this.cell || this.cell.dead) {
-            if (this.x > 600/2-100 && this.x < 600/2+100
-                && this.y > 600/2-100 && this.y < 600/2+100)
+            if (this.x > castle.x-100 && this.x < castle.x+100
+                && this.y > castle.y-100 && this.y < castle.y+100)
             {
                 this.angle = -Math.atan2(this.y - 300, -(this.x - 300));
                 return;
@@ -84,8 +86,8 @@ global.Enemy = class Enemy extends Tank {
             let distanceX = this.x - this.cell.x;
             let distanceY = this.y - this.cell.y;
             if (Math.abs(distanceX) > 150 || Math.abs(distanceY) > 150) {
-                if (this.x > 600/2-100 && this.x < 600/2+100
-                    && this.y > 600/2-100 && this.y < 600/2+100)
+                if (this.x > castle.x-100 && this.x < castle.x+100
+                    && this.y > castle.y-100 && this.y < castle.y+100)
                 {
                     this.angle = -Math.atan2(this.y - 300, -(this.x - 300));
                     return;
@@ -110,13 +112,14 @@ global.Enemy = class Enemy extends Tank {
     
 }
 
-module.exports = function (t) {
+module.exports = function () {
     if (!enemies.length) return;
     for (let j = 0; j < enemies.length; j++) {
         let enemy = enemies[j];
-        if (!enemy) return;
-        // if (isNight) {            
+        if (!enemy) continue;
+        // if (isNight) {
             Enemy.prototype.attack.call(enemy);
+            // enemy.attack();
             // ? fix ↑
             collision.bulletCollision(enemy, players);
             collision.bodyCollision(enemy, players);

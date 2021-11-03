@@ -1,3 +1,5 @@
+const { updateLevel } = require("./updater/helper");
+
 const levelSettings = (() => {
     let arr = [0],
         sc = 5;
@@ -11,6 +13,7 @@ module.exports = class Tank {
     constructor(id, score = 0) {
         this.x = ~~(Math.random() * 580 + 10);
         this.y = ~~(Math.random() * 580 + 10);
+        this.isPlayer = true;
         this.r = 10;
         this.id = id;
         this.className = 'default';
@@ -77,6 +80,8 @@ module.exports = class Tank {
             speed: 2,
             delay: 3000
         };
+        updateScore(this);
+        updateLevel(this);
     }
     get prevLevelsTotal () {
         let sum = 0;
@@ -151,19 +156,22 @@ module.exports = class Tank {
         let tankAngle = this.angle;
 
         for (let j = 0, len = guns.length; j < len; j++) {
-            let i = guns[j];
-            let angle = tankAngle + i.angle;
-            let speedX = ~~(Math.cos(angle) * bulletSpeed + random(spread[0], spread[1]));
-            let speedY = ~~(Math.sin(angle) * bulletSpeed + random(spread[0], spread[1]));
+            let gun = guns[j];
+            let angle = tankAngle + gun.angle;
+            // let speedX = ~~(Math.cos(angle) * bulletSpeed + random(spread[0], spread[1]));
+            // let speedY = ~~(Math.sin(angle) * bulletSpeed + random(spread[0], spread[1]));
+            // get the unit vector of the rotated x axis. Along player forward
+            let xAx = Math.cos(angle);
+            let xAy = Math.sin(angle);
+            let speedX = ~~(xAx * bulletSpeed + random(spread[0], spread[1]));
+            let speedY = ~~(xAy * bulletSpeed + random(spread[0], spread[1]));
             this.bullets.push({
                 aliveUntil: now + this.bulletLifeTime,
                 health: this.penetration,
-                // speedX: ~~speedX,
-                // speedY: ~~speedY,
                 speedX, speedY,
-                x: ~~(this.x + i.x + speedX*3),
-                y: ~~(this.y + i.y + speedY*3),
-                r: i.r
+                x: ~~((gun.x + gun.r/2) * xAx - (gun.y + gun.r/2) * xAy + this.x) + speedX*3,// - gunX / 2 + speedX*3),
+                y: ~~((gun.x + gun.r/2) * xAy + (gun.y + gun.r/2) * xAx + this.y) + speedY*3,
+                r: gun.r
             });
         }
         this.canShoot = false;

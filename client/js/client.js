@@ -88,11 +88,13 @@ sock.on('update', function (obj) {
         });
 
         canvas.addEventListener('mousedown', e => {
-            if (Object.keys(players[sock.id].availableClasses).length > 0) {
+            let player = players[sock.id];
+            if (!player) return;
+            if (Object.keys(player.availableClasses).length > 0) {
                 let ex = e.clientX;
                 let ey = e.clientY;
                 
-                let available = players[sock.id].availableClasses;
+                let available = player.availableClasses;
                 let x = 20;
                 let y = 20;
                 for (let i in available) {
@@ -114,7 +116,7 @@ sock.on('update', function (obj) {
                 }
             }
             mousedown = true;
-            Tank.prototype.shoot(players[sock.id], e);
+            Tank.prototype.shoot(player, e);
         });
         canvas.addEventListener('mouseup', () => mousedown = false);
         canvas.addEventListener('contextmenu', e => e.preventDefault());

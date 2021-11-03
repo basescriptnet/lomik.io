@@ -324,13 +324,17 @@ function game () {
     if (paused) return;
     if (!players) return;
     player = players[sock.id];
+    if (!player) {
+        setTimeout(() => requestAnimationFrame(game), 1000);
+        return;
+    }
     scene.clear();
     ctx.fillStyle = `rgba(33, 33, 33, ${opacity})`;
     fillRect(0, 0, cw, ch);
     drawHealth(castle);
     drawCastle();
     
-    if (player.dead && !castle.dead) {
+    if (player && player.dead && !castle.dead) {
         ctx.fillStyle = 'tomato';
         ctx.font = '40px Verdana';
         fillText(`Respawn in ${~~((seconds - now())/1000)} seconds`, 0 , ch/2 +230);
