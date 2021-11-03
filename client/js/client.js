@@ -1,10 +1,11 @@
 let sock = io();
 let mousedown = false;
 
-let players = {};
-let enemies = [];
-let isNight = false;
-let seconds = 0;
+globalThis.players = {};
+globalThis.enemies = [];
+globalThis.isNight = false;
+globalThis.seconds = 0;
+globalThis.cells = [];
 
 sock.on('updateCells', function (obj) {
     cells = obj;
@@ -14,12 +15,11 @@ sock.on('updateEnemies', function (obj) {
     enemies = obj;
 })
 
-
-
 sock.on('update', function (obj) {
     if (obj.objects) {
         for (let i in obj.objects) {
-            eval(i + ' = obj.objects[i]');
+            globalThis[i] = obj.objects[i];
+            // eval(i + ' = obj.objects[i]');
         }
     }
     else if (!obj.property && !obj.props) {
@@ -82,17 +82,19 @@ sock.on('update', function (obj) {
         let rotatedLastTime = 0;
 
         canvas.addEventListener('mousemove', e => {
-            if (now() < rotatedLastTime + 20) return;
+            if (now() < rotatedLastTime + 30) return;
             rotatedLastTime = now();
             Tank.prototype.rotate(players[sock.id], e);
         });
 
         canvas.addEventListener('mousedown', e => {
-            if (Object.keys(players[sock.id].availableClasses).length > 0) {
+            let player = players[sock.id];
+            if (!player) return;
+            if (Object.keys(player.availableClasses).length > 0) {
                 let ex = e.clientX;
                 let ey = e.clientY;
                 
-                let available = players[sock.id].availableClasses;
+                let available = player.availableClasses;
                 let x = 20;
                 let y = 20;
                 for (let i in available) {
@@ -114,7 +116,7 @@ sock.on('update', function (obj) {
                 }
             }
             mousedown = true;
-            Tank.prototype.shoot(players[sock.id], e);
+            Tank.prototype.shoot(player, e);
         });
         canvas.addEventListener('mouseup', () => mousedown = false);
         canvas.addEventListener('contextmenu', e => e.preventDefault());

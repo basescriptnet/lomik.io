@@ -1,9 +1,26 @@
+const Tank = require("../tank");
+
 module.exports = function () {
     let updatedPlayers = {};
     for (let i in players) {
         let player = players[i];
-        if (clients[i]) return;
-        if (!player || player.dead) return;
+        if (clients[i]) continue;
+        if (!player) {
+            continue;
+        }
+        else if (player.dead && player.lastDamaged + 5e3 > now) {
+            updatedPlayers[player.id] = player.simplify;
+            io.emit('update', {objects: {
+                player: player.simplify
+            }});
+            continue;
+        } else if (player.dead) {
+            let id = player.id;
+            players[id] = new Tank(id, ~~player.score/2)
+            updateScore(players[id])
+            updateLevel(players[id])
+            continue;
+        }
         let level = player.level;
         collision.bulletCollision(player, cells);
         collision.bodyCollision(player, cells);
@@ -15,9 +32,18 @@ module.exports = function () {
                 regen(player);
             else {
                 io.emit('update', {objects: {
-                    seconds: now + 1e4
+                    seconds: now + 5e3,
+                    players
                 }});
-                setTimeout(() => players[i] = new Tank(i), 1e4);
+                // setTimeout(() => {
+                //     // let player = players[i];
+                //     // debugger;
+                //     if (!players[i]) return;
+                //     players[i] = new Tank(i,
+                //         ~~players[i].score/2,
+                //     )
+                //     updateScore(players[i])
+                // }, 5e3);
             }
         }
     

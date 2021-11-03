@@ -1,7 +1,19 @@
+const { updateLevel } = require("./updater/helper");
+
+const levelSettings = (() => {
+    let arr = [0],
+        sc = 5;
+    for (let i = 0; i < 45; i++) {
+        arr.push(sc);
+        sc = Math.ceil(sc * 1.2);
+    }
+    return arr;
+})();
 module.exports = class Tank {
-    constructor(id) {
+    constructor(id, score = 0) {
         this.x = ~~(Math.random() * 580 + 10);
         this.y = ~~(Math.random() * 580 + 10);
+        this.isPlayer = true;
         this.r = 10;
         this.id = id;
         this.className = 'default';
@@ -13,20 +25,11 @@ module.exports = class Tank {
         this.bulletSpeed = 5;
         this.spread = [-.5, .5];
         this.dead = false;
-        this.maxHealth = 18;
+        this.maxHealth = 1800;
         this.health = this.maxHealth;
-        this.levelSettings = (() => {
-            let arr = [0],
-                sc = 5;
-            for (let i = 0; i < 45; i++) {
-                arr.push(sc);
-                sc = Math.ceil(sc * 1.1);
-            }
-            return arr;
-        })();
+        this.levelSettings = levelSettings;
         this.level = 0;
-        this.prevLevelsTotal = 0;
-        this.score = 0;
+        this.score = score|0;
         this.buttons = {
             c: false,
             e: false
@@ -54,8 +57,8 @@ module.exports = class Tank {
         //     return arr;
         // })();
         this.angle = 0;
-        this.bodyDamage = 7;
-        this.bulletDamage = 3;
+        this.bodyDamage = 700;
+        this.bulletDamage = 300;
         this.penetration = 0;
         this.bulletLifeTime = 1000;
         this.reloadDelay = 500;
@@ -74,9 +77,29 @@ module.exports = class Tank {
             timer: null,
             started: false,
             waiting: false,
-            speed: .02,
+            speed: 2,
             delay: 3000
         };
+        updateScore(this);
+        updateLevel(this);
+    }
+    get prevLevelsTotal () {
+        let sum = 0;
+        let levels = this.levelSettings;
+        for (let i in levels) {
+            sum += levels[i];
+            if (this.score < sum) {
+                this.upgradedNTimes[8] += i -1 - this.level;
+                this._prevLevelsTotal = sum - levels[i];
+                this.level = this.levelSettings.indexOf(levels[i-1]);
+                // this.r = 10 + this.level/20;
+                return this._prevLevelsTotal;
+            }
+        }
+        return sum;
+    }
+    set prevLevelsTotal (value) {
+        return this._prevLevelsTotal = value;
     }
     upgrade(obj = this, n) {
         n--;
@@ -120,27 +143,42 @@ module.exports = class Tank {
         }
     }
     shoot () {
+        // if (this.lastShootTime + this.reloadDelay < now) {
+        //     this.canShoot = true;
+        // }
+        // if (!this.canShoot) {
+        //     return
+        // };
+        this.lastShootTime = now;
         let guns = this.guns;
+        let bulletSpeed = this.bulletSpeed;
+        let spread = this.spread;
+        let tankAngle = this.angle;
 
         for (let j = 0, len = guns.length; j < len; j++) {
-            let i = guns[j];
-            let angle = this.angle + i.angle;
-            let speedX = Math.cos(angle) * this.bulletSpeed + random(this.spread[0], this.spread[1]);
-            let speedY = Math.sin(angle) * this.bulletSpeed + random(this.spread[0], this.spread[1]);
+            let gun = guns[j];
+            let angle = tankAngle + gun.angle;
+            // let speedX = ~~(Math.cos(angle) * bulletSpeed + random(spread[0], spread[1]));
+            // let speedY = ~~(Math.sin(angle) * bulletSpeed + random(spread[0], spread[1]));
+            // get the unit vector of the rotated x axis. Along player forward
+            let xAx = Math.cos(angle);
+            let xAy = Math.sin(angle);
+            let speedX = ~~(xAx * bulletSpeed + random(spread[0], spread[1]));
+            let speedY = ~~(xAy * bulletSpeed + random(spread[0], spread[1]));
             this.bullets.push({
                 aliveUntil: now + this.bulletLifeTime,
                 health: this.penetration,
-                speedX: +speedX.toFixed(2),
-                speedY: +speedY.toFixed(2),
-                x: +(this.x + i.x + speedX*3).toFixed(2),
-                y: +(this.y + i.y + speedY*3).toFixed(2),
-                r: i.r
+                speedX, speedY,
+                x: ~~((gun.x + gun.r/2) * xAx - (gun.y + gun.r/2) * xAy + this.x) + speedX*3,// - gunX / 2 + speedX*3),
+                y: ~~((gun.x + gun.r/2) * xAy + (gun.y + gun.r/2) * xAx + this.y) + speedY*3,
+                r: gun.r
             });
         }
         this.canShoot = false;
-        this.x -= Math.cos(this.angle)/.3;
-        this.y -= Math.sin(this.angle)/.3;
-
+        // this.x -= Math.cos(this.angle)/.3;
+        // this.y -= Math.sin(this.angle)/.3;
+        this.x -= Math.cos(this.angle)*2;
+        this.y -= Math.sin(this.angle)*2;
         setTimeout(() => this.canShoot = true, this.reloadDelay);
     }
     get simplify() {

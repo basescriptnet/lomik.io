@@ -76,15 +76,16 @@ class Scene {
         this.h = 900;
         canvas.width = 600;
         canvas.height = 600;
-        cw = canvas.width, ch = canvas.height;
+        cw = canvas.width;
+        ch = canvas.height;
         let cwHalf = cw/2;
         let chHalf = ch/2;
 
         this.minimap = {
-            x: this.w - this.w/6,
-            y: this.h - this.h/6,
-            width: this.w/6,
-            height: this.h/6,
+            x: cw - cw/6,
+            y: ch - ch/6,
+            width: cw/6,
+            height: ch/6,
             color: 'rgba(33, 33, 33, .3)'
         };
         this.camera = {
@@ -101,7 +102,7 @@ class Scene {
     clear () {
         ctx.clearRect(0, 0, this.w, this.h);
     }
-    drawMiniMap (x, y, r) {
+    drawMiniMap (x, y) {
         ctx.fillStyle = this.minimap.color;
         fillRect(this.minimap.x, this.minimap.y, this.minimap.width, this.minimap.height);
         strokeRect(this.minimap.x, this.minimap.y, this.minimap.width, this.minimap.height);
@@ -261,16 +262,16 @@ function drawHealth(obj) {
         width = wholeWidth;
         return;
     }
-    ctx.beginPath();
+    beginPath();
     ctx.fillStyle = '#000';
-    ctx.fillRect(x-w/2-5 - scene.camera.x, y + h+3 - scene.camera.y, w+10, 5);
+    fillRect(x-w/2-5 - scene.camera.x, y + h+3 - scene.camera.y, w+10, 5);
     ctx.fillStyle = 'lime';
-    ctx.fillRect(x-w/2-4 - scene.camera.x, y + h+4 - scene.camera.y, width, 3);
-    ctx.closePath();
+    fillRect(x-w/2-4 - scene.camera.x, y + h+4 - scene.camera.y, width, 3);
+    closePath();
 }
 
 const scene = new Scene();
-let cells = [];
+// let cells = [];
 
 let draw = Tank.prototype.draw;
 let shoot = Tank.prototype.shoot;
@@ -314,7 +315,7 @@ function gameOver() {
     ctx.font = "68px Arial";
     fillText("You are top FILTER", 0 , chHalf+90);
     ctx.font = "50px Arial";
-    fillText(`Your record is ${~~((castle.lastedUntill - castle.aliveFrom)/1000)} seconds`, 0 , chHalf +180);
+    fillText(`Your record is ${~~((castle.lastedUntil - castle.aliveFrom)/1000)} seconds`, 0 , chHalf +180);
     ctx.font = '40px Verdana';
     fillText(`New game starts in ${seconds} seconds`, 0 , chHalf +230);
 }
@@ -323,32 +324,50 @@ function game () {
     if (paused) return;
     if (!players) return;
     player = players[sock.id];
+    if (!player) {
+        setTimeout(() => requestAnimationFrame(game), 1000);
+        return;
+    }
     scene.clear();
     ctx.fillStyle = `rgba(33, 33, 33, ${opacity})`;
     fillRect(0, 0, cw, ch);
     drawHealth(castle);
     drawCastle();
+    
+    if (player && player.dead && !castle.dead) {
+        ctx.fillStyle = 'tomato';
+        ctx.font = '40px Verdana';
+        fillText(`Respawn in ${~~((seconds - now())/1000)} seconds`, 0 , ch/2 +230);
+    }
     for (let i in players) {
-        let player = players[i];
-        if (player.dead && !castle.dead) {
-            ctx.fillStyle = 'tomato';
-            ctx.font = '40px Verdana';
-            fillText(`Respawn in ${~~((seconds - now())/1000)} seconds`, cw/2 - cw/2 , ch/2 +230);
-        }
-        else {
-            drawHealth(player);
-            draw(player);
+        // avoiding of name conflicts
+        let playerN = players[i];
+        // if (playerN.x + 400 > player.x || playerN.x - 400 > player.x
+        //     || playerN.y + 400 > player.y || playerN.y - 400 > player.y
+        // ) continue;
+        if (playerN.dead) {
+            continue;
+        } else {
+            drawHealth(playerN);
+            draw(playerN);
         }
     }
     for (let i = 0; i < enemies.length; i++) {
-        drawHealth(enemies[i]);
-        draw(enemies[i]);
+        let enemy = enemies[i];
+        // if (enemy.x + 400 > player.x || enemy.x - 400 > player.x
+        //     || enemy.y + 400 > player.y || enemy.y - 400 > player.y
+        // ) continue;
+        drawHealth(enemy);
+        draw(enemy);
     }
     ctx.fillStyle = '#000';
     ctx.font = "40px serif";
-    fillText("[{ Lomik.io }]", 200, 40);
+    fillText("   Lomik.io   ", 200, 40);
 
     for (let i of cells) {
+        // if (!(i.x + 400 > player.x || i.x - 400 > player.x
+        //     || i.y + 400 > player.y || i.y - 400 > player.y
+        // )) continue;
         if (i.dead) {
             Geometry.prototype.draw(i, true);
             continue;
@@ -361,15 +380,15 @@ function game () {
         ctx.fillStyle = 'rgba(33, 33, 33, .7)';
         fillRect(0, 0, 600, 600);
     }
-    if (!player) return;
+    // if (!player) return;
     if (castle.dead) { // Game over
-        // second_2 = Date.now();        
+        // second_2 = Date.now();
         gameOver();
         // clearAnimationFrame(game);
     }
     else {
-        if (mousedown && player.canShoot
-            || player.buttons.e && player.canShoot
+        if (mousedown
+            || player.buttons.e
         ) shoot(player);
         Tank.prototype.drawUpgrades(player);
         Tank.prototype.drawScoreAndUpdates(player);

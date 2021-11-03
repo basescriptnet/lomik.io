@@ -1,3 +1,14 @@
+let z = 57; // ~~ 180 / Math.PI; used in object rotations;
+let levelSettings = (() => {
+    let arr = [0],
+        sc = 10;
+    for (let i = 0; i < 45; i++) {
+        arr.push(sc);
+        sc = ~~(sc * 1.2);
+    }
+    return arr;
+})();
+
 class Tank {
     constructor (x, y) {
         this.x = x;
@@ -9,17 +20,9 @@ class Tank {
         this.speed = 2;
         this.bulletSpeed = 5;
         this.dead = false;
-        this.maxHealth = 18;
+        this.maxHealth = 1800;
         this.health = this.maxHealth;
-        this.levelSettings = (() => {
-            let arr = [0],
-                sc = 10;
-            for (let i = 0; i < 45; i++) {
-                arr.push(sc);
-                sc = ~~(sc * 1.2);
-            }
-            return arr;
-        })();
+        this.levelSettings = levelSettings;
         this.level = 0;
         this.prevLevelsTotal = 0;
         this.score = 0;
@@ -35,8 +38,8 @@ class Tank {
             angle: 0
         }];
         this.angle = 0;
-        this.bodyDamage = 7;
-        this.bulletDamage = 3;
+        this.bodyDamage = 700;
+        this.bulletDamage = 300;
         this.penetration = 0;
         this.bulletLifeTime = 1000;
         this.reloadDelay = 500;
@@ -55,7 +58,7 @@ class Tank {
             timer: null,
             started: false,
             waiting: false,
-            speed: .02,
+            speed: 2,
             delay: 3000
         };
         this.bulletR = 5;
@@ -467,41 +470,42 @@ class Tank {
     drawScoreAndUpdates (obj) {
         // score
         let nextLvL = obj.levelSettings[obj.level+1];
-        let earnedNow = obj.score - obj.prevLevelsTotal;
+        let earnedNow = obj.score - obj.prevLevelsTotal|0;
+        // console.log(earnedNow)
         let percent = earnedNow * 100 / nextLvL;
-        if (percent > 100) percent = 100;
+        // if (percent > 100) percent = 100;
 
         let width = 120;
         let height = 12;
         let text;
 
         ctx.fillStyle = '#000';
-        ctx.fillRect(cw/2-width/2, ch - 30, width, height);
+        fillRect(cw/2-width/2, ch - 30, width, height);
         ctx.fillStyle = 'orangered';
-        ctx.fillRect(cw/2-width/2+1, ch - 28, percent * (width - 4) / 100, height-4);
+        fillRect(cw/2-width/2+1, ch - 28, percent * (width - 4) / 100, height-4);
 
         ctx.fillStyle = '#fff'
         ctx.font = "10px serif";
         text = `Score: ${obj.score}`;
-        ctx.fillText(text, cw/2-text.length*2, ch-20.5);
+        fillText(text, cw/2-text.length*2, ch-20.5);
 
         width = 130;
 
         ctx.fillStyle = '#000';
-        ctx.fillRect(cw/2-width/2, ch - 45, width, height);
+        fillRect(cw/2-width/2, ch - 45, width, height);
         ctx.fillStyle = 'dodgerblue';
-        ctx.fillRect(cw/2-width/2+1, ch - 43,
+        fillRect(cw/2-width/2+1, ch - 43,
             (obj.level * 100 / obj.levelSettings.length) * (width - 4) / 100,
             height-4);
         
         ctx.fillStyle = '#fff'
         ctx.font = "10px serif";
         text = `Level: ${obj.level}`;
-        ctx.fillText(text, cw/2-text.length*2, ch-36.5);
+        fillText(text, cw/2-text.length*2, ch-36.5);
         // score end
 
         // upgrades
-        // if (obj.upgradedNTimes[8] <= 0) return;
+        if (obj.upgradedNTimes[8] <= 0) return;
             
         let x = 20,
             y = ch - 130,
@@ -509,17 +513,17 @@ class Tank {
             h = 10,
             u = obj.upgradedNTimes;
         ctx.fillStyle = '#000';
-        ctx.save();
-        ctx.translate(x+w+3, y+5);
-        ctx.rotate(5.9);
+        save();
+        translate(x+w+3, y+5);
+        rotate(6);
         ctx.font = '20px sans-serif';
-        ctx.fillText(`x${u[8]}`, 0, 0);
-        ctx.restore();
+        fillText(`x${u[8]}`, 0, 0);
+        restore();
         for (let i in u) {
             if (i == u.length-1) break;
             
             ctx.fillStyle = '#000';
-            ctx.fillRect(x, y, w, h);
+            fillRect(x, y, w, h);
             // upgrade color
             switch (i|0) {
                 case 0:
@@ -550,12 +554,12 @@ class Tank {
                     ctx.fillStyle = 'white';
                     break;
             }
-            ctx.fillRect(x, y+1, (u[i] * 100 / 7) * (w-2) / 100, h-2)
+            fillRect(x, y+1, (u[i] * 100 / 7) * (w-2) / 100, h-2)
             let mx = x;
             ctx.fillStyle = '#000';
             let mw = w/7;
             for (let j = 0; j < 7; j++) {
-                ctx.strokeRect(mx, y, mw-1, h-1);
+                strokeRect(mx, y, mw-1, h-1);
                 mx += mw;
             }
             y += 15;
@@ -612,7 +616,6 @@ class Tank {
     }
     rotate(obj = this, e) {
         if (obj.buttons && obj.buttons.c) return;
-        let z = 180 / Math.PI;
         let directionX = e.clientX - obj.x + scene.camera.x;
         let directionY = e.clientY - obj.y + scene.camera.y;
         let radians = Math.atan2(directionX, -directionY);
@@ -622,68 +625,70 @@ class Tank {
     draw (obj = this, isFake) {
         let cameraX = scene.camera.x;
         let cameraY = scene.camera.y;
+        // console.log(ctx.fillStyle)
         if (isFake) {
-            cameraX = cameraY = 0;
+            cameraX = 0;
+            cameraY = 0;
         }
-        let twoPI = 2*Math.PI;
+        let twoPI = 6.3; // 2*Math.PI
         ctx.fillStyle = 'red';
-        if (obj.bullets instanceof Array) {
+        if (!isFake && obj.bullets instanceof Array) {
             for (let i of obj.bullets) {
-                ctx.beginPath();
+                beginPath();
                 if (i.type == 'attacker') {
                     Geometry.prototype.draw.call(i);
                 }
                 else
                     ctx.arc(i.x - cameraX, i.y - cameraY, i.r, 0, twoPI, false);
                 ctx.lineWidth = 1;
-                ctx.stroke();
-                ctx.fill();
-                ctx.closePath();
+                stroke();
+                fill();
+                closePath();
             }
         }
         
-        ctx.save();
-        ctx.translate(obj.x - cameraX, obj.y - cameraY);
-        ctx.rotate(obj.angle);
+        save();
+        translate(obj.x - cameraX, obj.y - cameraY);
+        rotate(obj.angle);
         
         for (let i of obj.guns) {
             if (i.points) {
                 let points = i.points;
-                ctx.beginPath();
+                beginPath();
                 for (let j = 0; j < points.length; j++) {
                     let p = points[j];
                     if (j == 0)
-                        ctx.moveTo(p[0], p[1]);
+                        moveTo(p[0], p[1]);
                     else 
-                        ctx.lineTo(p[0], p[1]);
+                        lineTo(p[0], p[1]);
                 }
                 ctx.fillStyle = 'grey';
-                ctx.fill();
-                ctx.stroke();
-                ctx.closePath();
+                fill();
+                stroke();
+                closePath();
                 // continue;
             }
             else {
-                ctx.save()
-                ctx.rotate(i.angle);
+                save()
+                rotate(i.angle);
                 let positions = [i.x, i.y, i.width, i.height];
                 ctx.fillStyle = 'grey';
-                ctx.fillRect(...positions)
+                fillRect(...positions)
                 ctx.fillStyle = '#000';
-                ctx.strokeRect(...positions);
-                ctx.restore();
+                strokeRect(...positions);
+                restore();
             }
         }
 
         // drawing player's circle
-        ctx.beginPath();
+        beginPath();
         ctx.arc(0, 0, obj.r, 0, twoPI, false);
         ctx.lineWidth = 3;
-        ctx.stroke();
+        stroke();
         ctx.fillStyle = obj.color;
-        ctx.fill();
-        ctx.closePath();
-        ctx.restore();
+        fill();
+        closePath();
+        restore();
     }
     shoot (obj = this) {
         if (!obj.canShoot) return;

@@ -4,16 +4,16 @@ module.exports = function (type = 'default', obj) {
         case 'twin':
             this.guns = [{
                     x: 0,
-                    y: -this.r,
-                    width: 30,
-                    height: 8,
+                    y: -12,
+                    width: 25,
+                    height: 12,
                     angle: 0
                 },
                 {
                     x: 0,
                     y: 0,
-                    width: 30,
-                    height: 8,
+                    width: 25,
+                    height: 12,
                     angle: 0
                 },
             ].map(i => {i.r = r; return i});

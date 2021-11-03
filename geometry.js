@@ -1,18 +1,22 @@
+// const cells = require("./entities/cells");
+
 module.exports = class Geometry {
     constructor (type) {
         this.r = 7.5;
+        this.x = random(this.r, 900-this.r);
+        this.y = random(this.r, 900-this.r);
         switch (type) {
             case 'square':
-                this.x = random(this.r, 600-this.r);
-                this.y = random(this.r, 600-this.r);
-                this.maxHealth = 4;
-                this.bodyDamage = 1;
+                // this.x = random(this.r, 600-this.r);
+                // this.y = random(this.r, 600-this.r);
+                this.maxHealth = 400;
+                this.bodyDamage = 100;
                 break;
             case 'triangle':
-                this.x = random(this.r, 600-this.r);
-                this.y = random(this.r, 600-this.r);
-                this.maxHealth = 13;
-                this.bodyDamage = 1.5;
+                // this.x = random(this.r, 600-this.r);
+                // this.y = random(this.r, 600-this.r);
+                this.maxHealth = 1300;
+                this.bodyDamage = 150;
                 break;
             case 'attacker':
                 this.r = 4;
@@ -20,22 +24,22 @@ module.exports = class Geometry {
                 this.y = Math.random(1) < 0.5 ? 600+50 : -50;
                 this.defaultX = this.x;
                 this.defaultY = this.y;
-                this.maxHealth = 13;
-                this.bodyDamage = 1.5;
+                this.maxHealth = 1300;
+                this.bodyDamage = 150;
                 break;
             case 'hexagon':
                 this.r = 20;
                 this.x = random(this.r+600/2-150, 600/2+150-this.r);
                 this.y = random(this.r+600/2-150, 600/2+150-this.r);
-                this.maxHealth = 42;
-                this.bodyDamage = 8.5;
+                this.maxHealth = 4200;
+                this.bodyDamage = 850;
                 break;
             case 'pentagon':
                 this.r = 10;
                 this.x = random(this.r+600/2-150, 600/2+150-this.r);
                 this.y = random(this.r+600/2-150, 600/2+150-this.r);
-                this.maxHealth = 65;
-                this.bodyDamage = 8;
+                this.maxHealth = 6500;
+                this.bodyDamage = 800;
                 break;
             default:
                 break;
@@ -44,7 +48,7 @@ module.exports = class Geometry {
         this.health = this.maxHealth;
         this.lastDamaged = 0;
         this.regeneration = {
-            speed: .02,
+            speed: 2,
             delay: 3000,
         }
         this.vx = 0;
@@ -59,9 +63,9 @@ module.exports = class Geometry {
         this.x += this.vx;
         this.y += this.vy;
         if (this.x <= 0) this.x = 0;
-        else if (this.x >= 600) this.x = 600;
+        else if (this.x >= 900) this.x = 900;
         if (this.y <= 0) this.y = 0;
-        else if (this.y >= 600) this.y = 600;
+        else if (this.y >= 900) this.y = 900;
 
         if (this.vx > 0) this.vx-=.2;
         else if (this.vx < 0) this.vx += .2;
@@ -100,27 +104,38 @@ module.exports = class Geometry {
         this.x += ~~vx;
         this.y += ~~vy;
     }
-    createCell (type) {
-        if (type) 
-            return new Geometry(type);
-        type = random(0, 11);
-        switch (type) {
-            case 0: case 1: case 2: case 3:
-                type = 'square';
-                break;
-            case 4:
-                type = 'hexagon';
-                break;
-            case 5: case 6: case 7: case 8:
-                type = 'triangle';
-                break;
-            case 9:
-                type = 'attacker';
-                break;
-            case 10:
-                type = 'pentagon';
-                break;
+    createCell (setType = 'any', count = 1, push = false) {
+        let result = [];
+        for (let i = 0; i < count; i++) {
+            let type = setType;
+            if (!type || type == 'any') {
+                type = random(0, 11);
+                switch (type) {
+                    case 0: case 1: case 2: case 3:
+                        type = 'square';
+                        break;
+                    case 4:
+                        type = 'hexagon';
+                        break;
+                    case 5: case 6: case 7: case 8:
+                        type = 'triangle';
+                        break;
+                    case 9:
+                        type = 'attacker';
+                        break;
+                    case 10:
+                        type = 'pentagon';
+                        break;
+                }
+            }
+            if (push)
+                cells.push(new Geometry(type))
+            else {
+                if (count == 1)
+                    return new Geometry(type);
+                else result.push(new Geometry(type));
+            }
         }
-        return new Geometry(type);
+        return result;
     }
 }

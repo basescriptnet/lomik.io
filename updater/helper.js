@@ -1,9 +1,8 @@
-let Tank = require('../tank');
 let classes = require('../classes');
-let createClass = name => {
-    let t = new Tank(0, 0).simplify;
-    classes.call(t, name, t);
-    return t;
+let createClass = className => {
+    let tank = new Tank(0, 0).simplify;
+    classes.call(tank, className, tank);
+    return tank;
 };
 
 let classStructure = {
@@ -53,11 +52,11 @@ function move(player) {
         if (buttons.left && buttons.right) dx = 0;
         if (buttons.up && buttons.down) dy = 0;
         if (dx !== 0 || dy !== 0) {
-            let x = +(player.x + player.speed * dx).toFixed(2);
-            let y = +(player.y + player.speed * dy).toFixed(2);
-            if (x > player.r && x < 600 - player.r)
+            let x = ~~(player.x + player.speed * dx);
+            let y = ~~(player.y + player.speed * dy);
+            if (x > player.r && x < 900 - player.r)
                 player.x = x;
-            if (y > player.r && y < 600 - player.r)
+            if (y > player.r && y < 900 - player.r)
                 player.y = y;
 
             isOutOfBox(player);
@@ -69,15 +68,16 @@ function isOutOfBox(obj) {
     let r = obj.r|0;
     if (obj.x - r <= 0)
         obj.x = r;
-    else if (obj.x + r >= 600)
-        obj.x = 600 - (r || obj.w|0);
+    else if (obj.x + r >= 900)
+        obj.x = 900 - (r || obj.w|0);
     if (obj.y - r <= 0)
         obj.y = r;
-    else if (obj.y + r >= 600)
-        obj.y = 600 - (r || obj.h|0);
+    else if (obj.y + r >= 900)
+        obj.y = 900 - (r || obj.h|0);
 }
 
 function updateLevel(player) {
+    // 2 is the number of levels required each time to get a new upgrade
     if (player.level > player.classPath.length * 2) {
         player.availableClasses = {};
         let tmp = classStructure;
@@ -87,7 +87,7 @@ function updateLevel(player) {
         for (let i in tmp) {
             player.availableClasses[i] = createClass(i);
         }
-    } else player.availableClasses = [];
+    } else player.availableClasses = {};
 }
 
 function regen(obj) {

@@ -1,13 +1,43 @@
-global.Enemy = class extends Tank {
-    constructor () {
+global.Enemy = class Enemy extends Tank {
+    constructor (boss = false) {
         super();
+        this.isPlayer = false;
+        this.isEnemy = true;
         this.className = 'twin';
         this.reloadDelay = 1000; // default
+        // this.maxHealth = this.health = this.maxHealth * 3;
+        // this.r *= 3;
+        // this.guns.map(i => {
+        //     i.width *= 3;
+        //     i.height *= 3;
+        //     i.r *= 3;
+        //     // i.y = -this.r / 2;
+        //     i.x += i.width / 3;
+        //     return i;
+        // })
         this.color = 'purple';
         this.x = Math.random() > .5 ? random(-30, 0) : random(600, 630);
         this.y = Math.random() > .5 ? random(-30, 0) : random(600, 630);
         this.x = Math.random() > .5 ? random(0, -30) : random(630, 600);
         this.y = Math.random() > .5 ? random(0, -30) : random(630, 600);
+
+        if (boss) {
+            this.color = 'yellow';
+            this.reloadDelay = 700; // default
+            this.maxHealth = this.health = this.maxHealth * 3;
+            this.r = 20;
+            this.bulletSpeed += 3;
+            this.bulletDamage += 150;
+            // this.spread = [-.3, .3];
+            this.guns = [{
+                x: 0,
+                y: -5,
+                r: 10,
+                width: 40,
+                height: 10,
+                angle: 0,
+            }]
+        }
     }
     get closestPlayer () {
         let distances = [];
@@ -37,8 +67,8 @@ global.Enemy = class extends Tank {
         if (!this.cell || this.cell.dead)
             this.cell = this.closestPlayer;
         if (!this.cell || this.cell.dead) {
-            if (this.x > 600/2-100 && this.x < 600/2+100
-                && this.y > 600/2-100 && this.y < 600/2+100)
+            if (this.x > castle.x-100 && this.x < castle.x+100
+                && this.y > castle.y-100 && this.y < castle.y+100)
             {
                 this.angle = -Math.atan2(this.y - 300, -(this.x - 300));
                 return;
@@ -56,8 +86,8 @@ global.Enemy = class extends Tank {
             let distanceX = this.x - this.cell.x;
             let distanceY = this.y - this.cell.y;
             if (Math.abs(distanceX) > 150 || Math.abs(distanceY) > 150) {
-                if (this.x > 600/2-100 && this.x < 600/2+100
-                    && this.y > 600/2-100 && this.y < 600/2+100)
+                if (this.x > castle.x-100 && this.x < castle.x+100
+                    && this.y > castle.y-100 && this.y < castle.y+100)
                 {
                     this.angle = -Math.atan2(this.y - 300, -(this.x - 300));
                     return;
@@ -82,13 +112,14 @@ global.Enemy = class extends Tank {
     
 }
 
-module.exports = function (t) {
+module.exports = function () {
     if (!enemies.length) return;
     for (let j = 0; j < enemies.length; j++) {
         let enemy = enemies[j];
-        if (!enemy) return;
-        // if (isNight) {            
+        if (!enemy) continue;
+        // if (isNight) {
             Enemy.prototype.attack.call(enemy);
+            // enemy.attack();
             // ? fix ↑
             collision.bulletCollision(enemy, players);
             collision.bodyCollision(enemy, players);
