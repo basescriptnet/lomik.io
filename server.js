@@ -67,7 +67,7 @@ let reset = () => {
         if (!isNight) return; 
         if (enemies.length > 5) return;
             
-        if (enemyAmount < 5) Math.random() > .85 ? enemyAmount++ : null;
+        // if (enemyAmount < 5) Math.random() > .85 ? enemyAmount++ : null;
         for (let i = 0; i < playersLength * enemyAmount; i++) {
             let enemyClass;
             switch (random(0, 10)) {
@@ -111,7 +111,7 @@ let reset = () => {
             enemies.push(enemy);
             // enemies.push(boss);
         }
-        Geometry.prototype.createCell('attacker', playersLength*3, true);
+        Geometry.prototype.createCell('attacker', playersLength, true);
     }, 10e3);
     castle.aliveFrom = Date.now();
     castle.dead = false;

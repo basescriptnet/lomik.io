@@ -5,6 +5,7 @@ global.Enemy = class Enemy extends Tank {
         this.isEnemy = true;
         this.className = 'twin';
         this.reloadDelay = 1000; // default
+        this.bodyDamage -= 300;
         // this.maxHealth = this.health = this.maxHealth * 3;
         // this.r *= 3;
         // this.guns.map(i => {

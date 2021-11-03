@@ -3,20 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- <meta http-equiv="X-UA-Compatible" content="ie=edge"> -->
-    <script src="js/qs.min.js"></script>
     <title>Lomik.io</title>
-</head>
-<body>
-    <canvas id="canvas" width="500" height="500" tabindex="1"></canvas>
-    <!-- <ul id="players"></ul> -->
-    <!-- <span id="tmp"> </span>
-    <script>
-        const tmp = document.getElementById('tmp').firstChild;
-    </script> -->
     <style>
         body {
             margin: 0;
+        }
+        nav {
+            position: absolute;
         }
         canvas#canvas {
             outline: 3px solid;
@@ -24,15 +17,17 @@
             background-size: 20px;
             cursor: crosshair;
         }
-        #players {
-            position: fixed;
-            top: 0;
-            right: 0;
-            width: 200px;
-        }
     </style>
+</head>
+<body>
+    <nav>
+        <label for="mobile">Switch to mobile control</label>
+        <input type="checkbox" name="mobile" id="mobile">
+    </nav>
+    <canvas id="canvas" width="500" height="500" tabindex="1"></canvas>
 
     <script src="/socket.io/socket.io.js"></script>
+    <script src="js/qs.min.js"></script>
     <script src="js/health.js" defer></script>
     <script src="js/tank.js" defer></script>
     <script src="js/draw.js" defer></script>

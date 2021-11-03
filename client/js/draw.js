@@ -34,8 +34,6 @@ const [
 
 let cw, ch, player;
 let random = (min, max) => ~~(Math.random() * (max - min) + min);
-let second_1 = Date.now(),
-    second_2 = Date.now();
 canvas.focus();
 
 function collision(x1, y1, w1, h1, x2, y2, w2, h2) {
@@ -271,7 +269,6 @@ function drawHealth(obj) {
 }
 
 const scene = new Scene();
-// let cells = [];
 
 let draw = Tank.prototype.draw;
 let shoot = Tank.prototype.shoot;
@@ -382,7 +379,6 @@ function game () {
     }
     // if (!player) return;
     if (castle.dead) { // Game over
-        // second_2 = Date.now();
         gameOver();
         // clearAnimationFrame(game);
     }
@@ -392,6 +388,18 @@ function game () {
         ) shoot(player);
         Tank.prototype.drawUpgrades(player);
         Tank.prototype.drawScoreAndUpdates(player);
+    }
+    if (mobile) {
+        ctx.fillStyle = 'rgba(33, 33, 33, .1)';
+        beginPath();
+        ctx.arc(cw * 3/4, ch * 3/4, 70, 0, 2 * Math.PI, false);
+        fill();
+        closePath();
+        
+        beginPath();
+        ctx.arc(cw/4, ch*3/4, 70, 0, 2 * Math.PI, false);
+        fill();
+        closePath();
     }
     scene.drawMiniMap(player.x, player.y);
 

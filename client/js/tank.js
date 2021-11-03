@@ -96,8 +96,10 @@ class Tank {
         if (!isKeydown) {
             let isAnyKeyPressed;
             for (let i in obj.moveButtons) {
-                if (obj.moveButtons[i] === true)
+                if (obj.moveButtons[i] === true) {
                     isAnyKeyPressed = true;
+                    break;
+                }
             }
             // console.log(isAnyKeyPressed);
             if (!isAnyKeyPressed)
@@ -465,6 +467,7 @@ class Tank {
                 y += 75;
             }
         }
+        // console.log(y)
         ctx.restore();
     }
     drawScoreAndUpdates (obj) {
@@ -580,7 +583,7 @@ class Tank {
                 break;
             case 75:
             case 107:
-                obj.buttons.e = !obj.buttons.e;
+                // obj.buttons.e = !obj.buttons.e;
                 sock.emit('score');
                 break;
         }

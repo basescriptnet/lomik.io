@@ -169,8 +169,12 @@ module.exports = {
             if (cell.dead) continue;
             if (CircularCollision(obj, cell))  {
                 obj.health -= cell.bodyDamage;
-                if (obj.health <= 0)
+                if (obj.health <= 0) {
+                    if (obj.isEnemy) {
+                        return enemies.splice(enemies.indexOf(obj), 1);
+                    }
                     obj.dead = true;
+                }
                 else obj.lastDamaged = now;
 
                 cell.health -= obj.bodyDamage;
@@ -215,7 +219,8 @@ module.exports = {
             }
         }
         // if the object is an enemy (cuz the checker function is the same for all)
-        if (enemies.includes(obj)) return;
+        // if (enemies.includes(obj)) return;
+        if (obj.isEnemy) return;
         for (let j = enemies.length; j >= 0; j--) {
             // neee. spese lengthi xndir kunenam... Amen merneluc bdi len-- enes
             let enemy = enemies[j];
@@ -224,6 +229,7 @@ module.exports = {
                 obj.health -= enemy.bodyDamage;
                 if (obj.health <= 0) {
                     obj.dead = true;
+                    // if (obj)
                     // console.log('dead by body damage')
                 }
                 else obj.lastDamaged = now;
