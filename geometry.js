@@ -1,10 +1,23 @@
-// const cells = require("./entities/cells");
-
 module.exports = class Geometry {
     constructor (type) {
         this.r = 7.5;
-        this.x = random(this.r, 900-this.r);
-        this.y = random(this.r, 900-this.r);
+        let collision;
+        // // checks if the chosen position is collapsed with a player, if yes, choses another position
+        do {
+            collision = false;
+            this.x = random(this.r, 900-this.r);
+            this.y = random(this.r, 900-this.r);
+            for (let i in players) {
+                let player = players[i];
+                if (CircularCollision({x: this.x, y: this.y, r: this.r*10}, player)) {
+                    collision = true;
+                    break;
+                }
+            }
+            if (CircularCollision({x: this.x, y: this.y, r: this.r*10}, {x: castle.x, y: castle.y, r: castle.side+200})) 
+                collision = true;
+        } while (collision);
+
         switch (type) {
             case 'square':
                 // this.x = random(this.r, 600-this.r);
@@ -31,8 +44,8 @@ module.exports = class Geometry {
                 this.r = 20;
                 this.x = random(this.r+600/2-150, 600/2+150-this.r);
                 this.y = random(this.r+600/2-150, 600/2+150-this.r);
-                this.maxHealth = 4200;
-                this.bodyDamage = 850;
+                this.maxHealth = 3800;
+                this.bodyDamage = 550;
                 break;
             case 'pentagon':
                 this.r = 10;
@@ -40,6 +53,13 @@ module.exports = class Geometry {
                 this.y = random(this.r+600/2-150, 600/2+150-this.r);
                 this.maxHealth = 6500;
                 this.bodyDamage = 800;
+                break;
+            case 'heptagon':
+                this.r = 18;
+                this.x = random(this.r+600/2-150, 600/2+150-this.r);
+                this.y = random(this.r+600/2-150, 600/2+150-this.r);
+                this.maxHealth = 2500;
+                this.bodyDamage = 600;
                 break;
             default:
                 break;
@@ -74,14 +94,17 @@ module.exports = class Geometry {
         this.angle += .01 * this.direction;
         if (this.angle >= 360) this.angle = 0; 
     }
-    attack () {
+    attack (destination = players) {
+        // if (destination && destination[0] && !destination[0].isPlayer) debugger
         let distances = [];
         let ids = [];
-        for (let i in players) {
-            if (players[i].dead) continue;
-            let dist = Math.sqrt((this.x-players[i].x)**2 + (this.y-players[i].y)**2);
-            distances.push(dist)
-            ids.push(players[i].id);
+        // let index = -1;
+        for (let i in destination) {
+            // index++;
+            if (destination[i].dead) continue;
+            let dist = Math.sqrt((this.x-destination[i].x)**2 + (this.y-destination[i].y)**2);
+            distances.push(dist);
+            ids.push(destination[i].id);
         }
         let closest = Math.min(...distances);
         // if (closest > 300) {
@@ -95,7 +118,7 @@ module.exports = class Geometry {
             // return;
         // };
         let index = distances.indexOf(closest);
-        let player = players[ids[index]];
+        let player = destination[ids[index]] || destination[index]; // 1. for players, 2. for enemies
         if (!player) return;
 
         this.angle = -Math.atan2(this.y - player.y, -(this.x - player.x));

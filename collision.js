@@ -13,62 +13,19 @@
 //     return (dx**2 + dy**2 <= circle.r**2);
 // }
 
-function CircularCollision(circle1, circle2) {
-    if (!circle1 || !circle2) return;
-    return ((circle1.x - circle2.x)**2 + (circle1.y - circle2.y)**2)**.5 < circle1.r + circle2.r;
-    // let dx = circle1.x - circle2.x;
-    // let dy = circle1.y - circle2.y;
-    // let distance = (dx * dx + dy * dy)**.5;
-
-    // return (distance < circle1.r + circle2.r);
-}
-
-global.updateScore = function (obj, cellType) {
-    let score = 0;
-    if (cellType) {
-        switch (cellType) {
-            case 'square':
-                score = 10;
-                break;
-            case 'triangle':
-            case 'attacker':
-                score = 15;
-                break;
-            case 'pentagon':
-                score = 130;
-                break;
-            case 'hexagon':
-            case 'enemy':
-                score = 250;
-                break;
-        }
-    }
-    // ? fix it! levels are not updated. Classes are not available
-    obj.score += score;
-
-    let levels = obj.levelSettings;
-    if (obj.score >= obj._prevLevelsTotal + levels[obj.level+1]) {
-        let sum = 0;
-        for (let i in levels) {
-            sum += levels[i];
-            if (obj.score < sum) {
-                obj.upgradedNTimes[8] += i -1 - obj.level;
-                obj._prevLevelsTotal = sum - levels[i];
-                obj.level = obj.levelSettings.indexOf(levels[i-1]);
-                obj.r = 10 + obj.level/20;
-                break;
-            }
-        }
-    }
-}
-
 module.exports = {
     bulletCollision (obj, cells) {
-        if (!obj) return;
+        if (!obj || obj.dead) return;
         if (obj.isEnemy && cells && cells[0]?.isEnemy) return;
+        let incrementor = 1
+        if (obj.isPlayer) {
+            if (CircularCollision(obj, {x: 200, y: 200, r: 20})) {
+                incrementor = 2;
+            }
+        }
         for (let i = 0, len = obj.bullets.length; i < len; i++) {
             let bullet = obj.bullets[i];
-            for (let j in cells) { // this makes sure, that objects are parsed as well
+            for (let j in cells) { // for in loop makes sure, that objects are parsed as well
                 let cell = cells[j];
                 if (!cell) continue;
                 if (cell.dead) continue;
@@ -77,7 +34,7 @@ module.exports = {
                     if (bullet.health <= 0) {
                         obj.bullets.splice(obj.bullets.indexOf(bullet), 1);
                     }
-                    cell.health -= obj.bulletDamage;
+                    cell.health -= obj.bulletDamage * incrementor;
                     if (cell.health <= 0) {
                         cell.dead = true;
                         if (cell.isEnemy) {
@@ -161,6 +118,7 @@ module.exports = {
         }
     },
     bodyCollision (obj, cells) {
+        if (!obj || obj.dead) return;
         if (obj.isEnemy && cells && cells[0]?.isEnemy) return;
         // for (let i = 0, len = cells.length;  i < len; i++) {
         for (let i in cells) {

@@ -9,6 +9,7 @@ require('./globals');
 require('./updater');
 const classes = require('./classes');
 let { checkCells, checkPlayers, checkEnemies } = require('./entities');
+castle = new Castle();
 const modeInterval = {
     easy: {
         firstNight: 10e3,
@@ -37,8 +38,6 @@ const modeInterval = {
     }
 };
 
-let drop = {lastDropped: 0};
-
 // global reusable variables and functions
 let intervalId = null;
 let nightInterval = null;
@@ -57,6 +56,7 @@ let reset = () => {
     enemies = [];
 
     Geometry.prototype.createCell('any', 20, true);
+    Geometry.prototype.createCell('heptagon', 1, true);
 
     let enemyAmount = 1;
 
@@ -122,7 +122,7 @@ io.on('connection', sock => {
     clients[sock.id] = false;
     playersLength++;
 
-    // if the first player joined, run loop
+    // if the first player joined, run the loop
     if (playersLength === 1) {
         reset();
         // enemies.push(new Enemy());
@@ -139,7 +139,7 @@ io.on('connection', sock => {
             };
             // gets lightweight variant of players object, so you can update it faster
             let updatedPlayers;
-            try { // navsyaki, or awibka tta serv0
+            try {
                 updatedPlayers = checkPlayers();
                 // enemies
                 checkEnemies();
@@ -158,7 +158,7 @@ io.on('connection', sock => {
 
                 if (!isNight) opacity -= 0.02;
                 else opacity += 0.02;
-                if (opacity > .6) opacity = .6;
+                if (opacity > .5) opacity = .5;
                 else if (opacity < 0) opacity = 0;
 
                 io.emit('update', {objects: {

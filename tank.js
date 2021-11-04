@@ -11,10 +11,11 @@ const levelSettings = (() => {
 })();
 module.exports = class Tank {
     constructor(id, score = 0) {
-        this.x = ~~(Math.random() * 580 + 10);
-        this.y = ~~(Math.random() * 580 + 10);
-        this.isPlayer = true;
+        // place the player in the center
         this.r = 10;
+        this.x = random(castle.x - 50 + this.r, castle.x + 50 - this.r);
+        this.y = random(castle.y - 50 + this.r, castle.y + 50 - this.r);
+        this.isPlayer = true;
         this.id = id;
         this.className = 'default';
         this.color = 'dodgerblue';
@@ -122,17 +123,17 @@ module.exports = class Tank {
                 obj.bulletSpeed += .5;
                 break;
             case 4:
-                // obj.penetration += 2;
+                obj.penetration += 50;
                 // obj.bulletDamage += 2;
                 break;
             case 5:
-                obj.bulletDamage += .5;
+                obj.bulletDamage += 50;
                 break;
             case 6:
-                obj.reloadDelay -= 50;
+                obj.reloadDelay -= 35;
                 break;
             case 7:
-                obj.speed += .3;
+                obj.speed += .2;
                 break;
         }
 

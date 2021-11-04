@@ -9,9 +9,9 @@ module.exports = class Castle {
         this.lastedUntil = null;
         this.regeneration = {
             speed: 20,
-            delay: 12e3, // ! 12e4 bdi exni
+            delay: 15e3,
         };
-        this.x = 300;
-        this.y = 300;
+        this.x = 450;
+        this.y = 450;
     }
 };

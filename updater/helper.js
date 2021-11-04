@@ -91,8 +91,16 @@ function updateLevel(player) {
 }
 
 function regen(obj) {
-    if (obj.lastDamaged + obj.regeneration.delay < now) {
-        obj.health += obj.regeneration.speed;
+    let incrementor = 1;
+    let delay = obj.regeneration.delay;
+    if (obj.isPlayer) {
+        if (CircularCollision(obj, {x: 700, y: 700, r: 20})) {
+            incrementor = 3;
+            delay /= 2;
+        }
+    }
+    if (obj.lastDamaged + delay < now) {
+        obj.health += obj.regeneration.speed * incrementor;
         if (obj.health > obj.maxHealth) {
             obj.health = obj.maxHealth;
         }

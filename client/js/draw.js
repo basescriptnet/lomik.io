@@ -157,6 +157,7 @@ class Geometry {
         if (scale) {
             ctx.scale(obj.scale, obj.scale);
         }
+        ctx.strokeWidth = 4;
         if (obj.type == 'square') {
             beginPath();
             lineTo(-obj.r,obj.r);
@@ -169,7 +170,6 @@ class Geometry {
         }
         else if (obj.type == 'triangle') {
             beginPath();
-            ctx.strokeWidth = 4;
             ctx.fillStyle = 'red';
             moveTo(-obj.r, -obj.r);
             lineTo(obj.r*2, -obj.r);
@@ -181,7 +181,6 @@ class Geometry {
         }
         else if (obj.type == 'pentagon') {
             beginPath();
-            ctx.strokeWidth = 4;
             ctx.fillStyle = 'rgb(118, 141, 252)';
             let a = Math.PI * 2/5;
             moveTo(obj.r*2, 0);
@@ -197,9 +196,8 @@ class Geometry {
         else if (obj.type == 'hexagon') {
             let n = 2/3.5;
             beginPath();
-            ctx.strokeWidth = 4;
             ctx.fillStyle = '#000';
-            let a = Math.PI * 2/5;
+            // let a = Math.PI * 2/5;
             moveTo(0, -obj.r-2);
             lineTo(obj.r, -obj.r*n);
             lineTo(obj.r, obj.r*n);
@@ -220,12 +218,33 @@ class Geometry {
             // ctx.lineWidth = 3;
             // ctx.stroke()
             fill();
-            ctx.fillStyle = '#000';
+            // ctx.fillStyle = '#000';
+            closePath();
+        }
+        else if (obj.type == 'heptagon') {
+            beginPath();
+            ctx.fillStyle = 'lime';
+            ctx.beginPath();
+            ctx.moveTo (obj.r * Math.cos(0),  obj.r *  Math.sin(0));          
+            for (var i = 1; i <= 7; i += 1) 
+            {
+                ctx.lineTo (obj.r * Math.cos(i * 2 * Math.PI / 7), obj.r * Math.sin(i * 2 * Math.PI / 7));
+            }
+            ctx.stroke();
+            // let a = Math.PI * 2/5;
+            // moveTo(0, -obj.r-2);
+            // lineTo(2, -obj.r+1);
+            // lineTo(, -obj.r*n);
+            // lineTo(obj.r, obj.r*n);
+            // lineTo(2, obj.r);
+            // lineTo(-obj.r-2, obj.r*n);
+            // lineTo(-obj.r, -obj.r*n);
+            // lineTo(0, -obj.r-2);
+            fill();
             closePath();
         }
         else if (obj.type == 'attacker') {
             beginPath();
-            ctx.strokeWidth = 4;
             ctx.fillStyle = 'rgb(252, 118, 119)';
             moveTo(-obj.r, -obj.r);
             lineTo(obj.r*2, obj.r-2);
@@ -330,6 +349,30 @@ function game () {
     fillRect(0, 0, cw, ch);
     drawHealth(castle);
     drawCastle();
+    // draws power stations
+    save()
+        // double damage
+        ctx.lineWidth = 10;
+        ctx.strokeStyle = 'red';
+        beginPath();
+            ctx.arc(200 - scene.camera.x, 200 - scene.camera.y, 20, 0, 6.3, false);
+            stroke();
+        closePath();
+        beginPath();
+            ctx.arc(200 - scene.camera.x, 200 - scene.camera.y, 5, 0, 6.3, false);
+            stroke();
+        closePath();
+        ctx.strokeStyle = 'lime';
+        // health
+        beginPath();
+        ctx.arc(700 - scene.camera.x, 700 - scene.camera.y, 20, 0, 6.3, false);
+        stroke();
+        closePath();
+        beginPath();
+            ctx.arc(700 - scene.camera.x, 700 - scene.camera.y, 5, 0, 6.3, false);
+            stroke();
+        closePath();
+    restore()
     
     if (player && player.dead && !castle.dead) {
         ctx.fillStyle = 'tomato';

@@ -1,8 +1,26 @@
 global.Enemy = class Enemy extends Tank {
     constructor (boss = false) {
         super();
+        this.id = Math.random().toString(16).substr(2, 8); // generates a random String
         this.isPlayer = false;
         this.isEnemy = true;
+        // check if chosen position collides with the player
+        // let collision;
+        // do {
+        //     collision = false;
+            this.x = random(this.r-60, 900+this.r)+60;
+            this.y = [-100, 1000][random(0, 1)];
+        //     // for (let i = cells.length; i <= 0; i--) {
+        //     //     let cell = cells[i];
+        //     //     if (CircularCollision({x: this.x, y: this.y, r: this.r*10}, cell))
+        //     //         collision = true;
+        //     // }
+        //     for (let i in players) {
+        //         let player = players[i];
+        //         if (CircularCollision({x: this.x, y: this.y, r: this.r*10}, player))
+        //             collision = true;
+        //     }
+        // } while (collision);
         this.className = 'twin';
         this.reloadDelay = 1000; // default
         this.bodyDamage -= 300;
@@ -67,22 +85,24 @@ global.Enemy = class Enemy extends Tank {
     attack () {
         if (!this.cell || this.cell.dead)
             this.cell = this.closestPlayer;
+        // attack the castle
         if (!this.cell || this.cell.dead) {
             if (this.x > castle.x-100 && this.x < castle.x+100
                 && this.y > castle.y-100 && this.y < castle.y+100)
             {
-                this.angle = -Math.atan2(this.y - 300, -(this.x - 300));
+                this.angle = -Math.atan2(this.y - 450, -(this.x - 450));
                 return;
             }
             let x, y;
-            if (this.x < 300) x = this.x - 250;
-            else x = this.x - 350;
+            if (this.x < castle.x) x = this.x - castle.x - 50;
+            else x = this.x - castle.x + 50;
 
-            if (this.y < 300) y = this.y - 250;
-            else y = this.y - 350;
+            if (this.y < castle.x) y = this.y - castle.y - 50;
+            else y = this.y - castle.y + 50;
 
             this.angle = -Math.atan2(y, -x);
         }
+        // attack the closest player
         else {
             let distanceX = this.x - this.cell.x;
             let distanceY = this.y - this.cell.y;
@@ -90,15 +110,22 @@ global.Enemy = class Enemy extends Tank {
                 if (this.x > castle.x-100 && this.x < castle.x+100
                     && this.y > castle.y-100 && this.y < castle.y+100)
                 {
-                    this.angle = -Math.atan2(this.y - 300, -(this.x - 300));
+                    this.angle = -Math.atan2(this.y - castle.x, -(this.x - castle.y));
                     return;
                 }
                 let x, y;
-                if (this.x < 300) x = this.x - 250;
-                else x = this.x - 350;
+                // visibility of the player is 300px
+                // if (this.x < 300) x = this.x - 250;
+                // else x = this.x - 350;
                 
-                if (this.y < 300) y = this.y - 250;
-                else y = this.y - 350;
+                // if (this.y < 300) y = this.y - 250;
+                // else y = this.y - 350;
+                
+                if (this.x < castle.x) x = this.x - castle.x - 50;
+                else x = this.x - castle.x + 50;
+
+                if (this.y < castle.x) y = this.y - castle.y - 50;
+                else y = this.y - castle.y + 50;
 
                 this.angle = -Math.atan2(y, -x);
                 // this.angle = -Math.atan2(this.y - 300, -(this.x - 300));

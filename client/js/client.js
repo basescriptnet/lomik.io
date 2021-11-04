@@ -6,7 +6,7 @@ globalThis.enemies = [];
 globalThis.isNight = false;
 globalThis.seconds = 0;
 globalThis.cells = [];
-globalThis.mobile = true;
+globalThis.mobile = false;
 
 sock.on('updateCells', function (obj) {
     cells = obj;
@@ -114,11 +114,12 @@ sock.on('update', function (obj) {
         let rotatedLastTime = 0;
 
 
-        if (globalThis.mobile) {
+        // if (globalThis.mobile) {
             
-        }
+        // }
         // Set up touch events for mobile, etc
         canvas.addEventListener("touchstart", function (e) {
+            if (!mobile) return;
             e.preventDefault();
             availableClassTouch(e.touches[0].clientX, e.touches[0].clientY, true);
             // mousePos = getTouchPos(canvas, e);
@@ -140,6 +141,7 @@ sock.on('update', function (obj) {
         }, false);
 
         canvas.addEventListener("touchend", function (e) {
+            if (!mobile) return;
             if (now() < rotatedLastTime + 30) return;
             let mouseEvent = new MouseEvent("mouseup", {});
             canvas.dispatchEvent(mouseEvent);
@@ -155,6 +157,7 @@ sock.on('update', function (obj) {
         }, false);
 
         canvas.addEventListener("touchmove", function (e) {
+            if (!mobile) return;
             if (now() < rotatedLastTime + 30) return;
             for (let i = 0; i < 2; i++) {
                 let touch = e.touches[i];

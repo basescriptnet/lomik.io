@@ -10,6 +10,10 @@ module.exports = function () {
         }
         else if (i.type == 'attacker') {
             i.attack();
+        } else if (i.type == 'heptagon') {
+            // for future. It lets you to set the enemies as a target
+            // and to attack with geometric objects
+            // i.attack(enemies);
         }
         if (i.health < i.maxHealth) {
             regen(i);
