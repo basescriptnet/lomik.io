@@ -16,7 +16,7 @@
 module.exports = {
     bulletCollision (obj, cells) {
         if (!obj || obj.dead) return;
-        if (obj.isEnemy && cells && cells[0]?.isEnemy) return;
+        if (obj.isEnemy && cells && cells[0] && cells[0].isEnemy) return;
         let incrementor = 1
         if (obj.isPlayer) {
             if (CircularCollision(obj, {x: 200, y: 200, r: 20})) {
@@ -119,7 +119,7 @@ module.exports = {
     },
     bodyCollision (obj, cells) {
         if (!obj || obj.dead) return;
-        if (obj.isEnemy && cells && cells[0]?.isEnemy) return;
+        if (obj.isEnemy && cells && cells[0] && cells[0].isEnemy) return;
         // for (let i = 0, len = cells.length;  i < len; i++) {
         for (let i in cells) {
             let cell = cells[i];
