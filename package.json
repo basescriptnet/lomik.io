@@ -4,7 +4,7 @@
   "description": "Mix of diep.io and other games",
   "main": "server.js",
   "scripts": {
-    "test": "node server.js",
+    "test": "node tank.js",
     "install": "npm install express --save",
     "start": "node server.js"
   },
