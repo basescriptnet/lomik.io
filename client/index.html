@@ -26,11 +26,93 @@
     </nav>
     <canvas id="canvas" width="500" height="500" tabindex="1"></canvas>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="js/qs.min.js"></script>
+    <script>
+        window.global = window;
+        let io = {
+            id: 'offline',
+            emit (event, ...args) {
+                try {
+                    this.methods[event](...args);
+                } catch (err) {
+                    console.warn(`${event} is not a function.`);
+                }
+            },
+            methods: {
+                updateCells (callback) {
+                    callback();
+                    // cells = obj;
+                },
+                updateEnemies (callback) {
+                    callback();
+                    // enemies = obj;
+                },
+                update (callback) {
+                    callback()
+                }
+            }
+        };
+        let sock = {
+            id: 'offline',
+            on (event, ...args) {
+                try {
+                    this.methods[event](...args);
+                } catch (err) {
+                    console.warn(`${event} is not a function.`);
+                }
+            },
+            methods: {
+                updateCells (callback) {
+                    callback();
+                    // cells = obj;
+                },
+                updateEnemies (callback) {
+                    callback();
+                    // enemies = obj;
+                },
+                update (callback) {
+                    callback()
+                },
+                rotate (callback) {
+                    callback()
+                },
+                score (callback) {
+                    callback()
+                },
+                changeTank (callback) {
+                    callback()
+                },
+                upgrade (callback) {
+                    callback()
+                },
+                shoot (callback) {
+                    callback()
+                },
+                // update (callback) {
+                //     callback()
+                // },
+            }
+        };
+    </script>
+    <!-- <script src="/socket.io/socket.io.js"></script>
+        <script src="js/qs.min.js"></script> -->
+    <script src="js/offline/collision.js" defer></script>
+    <script src="js/offline/geometry.js"></script>
+    <!-- <script>console.log(Geometry)</script> -->
+    <script src="js/offline/classes.js" defer></script>
+    <script src="js/offline/entities/castle.js" defer></script>
+    <script src="js/offline/updater/helper.js" defer></script>
+    <!-- <script src="js/offline/classes.js" defer></script>
+        <script src="js/offline/classes.js" defer></script> -->
+        <script src="js/offline/tank.js" defer></script>
+        <script src="js/offline/entities/enemies.js" defer></script>
+        <script src="js/offline/entities/players.js" defer></script>
+        <script src="js/offline/entities/cells.js" defer></script>
+    <script src="js/offline/globals.js" defer></script>
+    <script src="js/offline/fake_server.js" defer></script>
+    <script src="js/offline/offline.js" defer></script>
     <script src="js/health.js" defer></script>
     <script src="js/tank.js" defer></script>
     <script src="js/draw.js" defer></script>
-    <script src="js/client.js" defer></script>
+    <!-- <script src="js/client.js" defer></script> -->
 </body>
 </html>

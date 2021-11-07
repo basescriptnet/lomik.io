@@ -105,13 +105,16 @@ class Tank {
             if (!isAnyKeyPressed)
                 obj.isMoving = false;
         }
-        sock.emit('update', {
-            id: sock.id,
-            props: [
-                ['moveButtons', obj.moveButtons],
-                ['isMoving', obj.isMoving]
-            ]
-        })
+        // ! for server
+        // sock.emit('update', {
+        //     id: sock.id,
+        //     props: [
+        //         ['moveButtons', obj.moveButtons],
+        //         ['isMoving', obj.isMoving]
+        //     ]
+        // })
+        players[sock.id].isMoving = obj.isMoving;
+        players[sock.id].moveButtons = obj.moveButtons;
 
         // let props = new Map();
         // props.set('isMoving', obj.isMoving);
@@ -455,12 +458,17 @@ class Tank {
         ctx.scale(.8, .8);
         for (let i in available) {
             let j = available[i];
+            // ! remove for server
+            if (!j) {
+                j = new Tank(0, 0);
+                classes.call(j, i, j);
+            }
             j.x = x+35;
             j.y = y+35;
             ctx.strokeRect(x, y, 70, 70);
             ctx.fillStyle = 'rgba(33, 33, 33, .3)';
             ctx.fillRect(x, y, 70, 70);
-            Tank.prototype.draw(j, true)
+            Tank.prototype.draw(j,  true)
             x += 75;
             if (x > 95) {
                 x = 20;
@@ -574,23 +582,25 @@ class Tank {
             case 67:
             case 99:
                 obj.buttons.c = !obj.buttons.c;
-                sock.emit('update', {id: sock.id, property: ['buttons', 'c'], value: obj.buttons.c});
+                // sock.emit('update', {id: sock.id, property: ['buttons', 'c'], value: obj.buttons.c});
                 break;
             case 69:
             case 101:
                 obj.buttons.e = !obj.buttons.e;
-                sock.emit('update', {id: sock.id, property: ['buttons', 'e'], value: obj.buttons.e});
+                // sock.emit('update', {id: sock.id, property: ['buttons', 'e'], value: obj.buttons.e});
                 break;
             case 75:
             case 107:
                 // obj.buttons.e = !obj.buttons.e;
-                sock.emit('score');
+                // sock.emit('score');
+                addScore()
                 break;
         }
         // [1..8]
         if (e.keyCode >= 49 && e.keyCode < 57) {
             // Tank.prototype.upgrade(obj, e.key|0);
-            sock.emit('upgrade', e.key|0)
+            // sock.emit('upgrade', e.key|0)
+            upgrade(e.key|0)
         }
     }
     move (obj = this) {
@@ -623,7 +633,10 @@ class Tank {
         let directionY = e.clientY - obj.y + scene.camera.y;
         let radians = Math.atan2(directionX, -directionY);
         let angle = obj.angle = (radians * z + 270) / z;
-        sock.emit('update', {id: sock.id, property: 'angle', value: angle});
+        // ! uncomment for socket.io use
+        // sock.emit('update', {id: sock.id, property: 'angle', value: angle});
+        // ! comment for socket.io use
+        players[sock.id].angle = angle;
     }
     draw (obj = this, isFake) {
         let cameraX = scene.camera.x;
@@ -695,7 +708,9 @@ class Tank {
     }
     shoot (obj = this) {
         if (!obj.canShoot) return;
-        sock.emit('shoot');
+        // ! changed here
+        window.Tank.prototype.shoot.call(obj)
+        // sock.emit('shoot');
     }
     bodyCollision () {
         for (let i of cells) {

@@ -1,7 +1,12 @@
 const canvas = document.getElementById`canvas`,
-    ctx = canvas.getContext`2d`,
-    now = () => Date.now();
-
+    ctx = canvas.getContext`2d`;
+    // now = () => Date.now();
+if (window.opacity) {
+    window.opacity = opacity;
+} else window.opacity = 0;
+if (typeof window.now !== 'number') {
+    window.now = () => Date.now()
+}
 const [
     lineTo,
     moveTo,
@@ -377,7 +382,7 @@ function game () {
     if (player && player.dead && !castle.dead) {
         ctx.fillStyle = 'tomato';
         ctx.font = '40px Verdana';
-        fillText(`Respawn in ${~~((seconds - now())/1000)} seconds`, 0 , ch/2 +230);
+        fillText(`Respawn in ${~~((seconds - now)/1000)} seconds`, 0 , ch/2 +230);
     }
     for (let i in players) {
         // avoiding of name conflicts
