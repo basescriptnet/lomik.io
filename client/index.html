@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>Lomik.io</title>
     <style>
         body {
@@ -23,11 +26,15 @@
     <nav>
         <label for="mobile">Switch to mobile control</label>
         <input type="checkbox" onclick="mobile = !mobile" name="mobile" id="mobile">
+        <label for="performance">Switch performance</label>
+        <input type="checkbox" onclick="performance = !performance" name="performance" id="performance">
+        
     </nav>
     <canvas id="canvas" width="500" height="500" tabindex="1"></canvas>
-
+    <!-- <div style="width: 170px; height: 10px; background: red"></div> -->
     <script>
         window.global = window;
+        window.performance = false;
         let io = {
             id: 'offline',
             emit (event, ...args) {

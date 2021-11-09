@@ -79,18 +79,37 @@ class Scene {
         this.h = 900;
         canvas.width = 600;
         canvas.height = 600;
+        this.resize();
+
+        // this.minimap = {
+        //     x: cw - cw/6,
+        //     y: ch - ch/6,
+        //     width: cw/6,
+        //     height: ch/6,
+        //     color: 'rgba(33, 33, 33, .3)'
+        // };
+    }
+    resize () {
+        if (window.innerWidth < 600) {
+            canvas.width = window.innerWidth;
+        } else canvas.width = 600;
+        if (window.innerHeight < 600) {
+            canvas.height = window.innerHeight;
+        } else canvas.height = 600;
         cw = canvas.width;
         ch = canvas.height;
+        let max = Math.max(cw, ch);
+        this.minimap = {
+            x: cw - max/6,
+            y: ch - max/6,
+            width: max/6,
+            height: max/6,
+            color: 'rgba(33, 33, 33, .3)'
+        };
+
         let cwHalf = cw/2;
         let chHalf = ch/2;
 
-        this.minimap = {
-            x: cw - cw/6,
-            y: ch - ch/6,
-            width: cw/6,
-            height: ch/6,
-            color: 'rgba(33, 33, 33, .3)'
-        };
         this.camera = {
             get x () {
                 if (!player) return 0;
@@ -106,12 +125,13 @@ class Scene {
         ctx.clearRect(0, 0, this.w, this.h);
     }
     drawMiniMap (x, y) {
+        if (performance) return;
         ctx.fillStyle = this.minimap.color;
         fillRect(this.minimap.x, this.minimap.y, this.minimap.width, this.minimap.height);
         strokeRect(this.minimap.x, this.minimap.y, this.minimap.width, this.minimap.height);
         ctx.fillStyle = '#000';
         beginPath();
-        ctx.arc(this.minimap.x +x/6, this.minimap.y + y/6, 2, 2 * Math.PI, false);
+        ctx.arc(this.minimap.x + x/6, this.minimap.y + y/6, 2, 2 * Math.PI, false);
         fill();
         closePath();
     }
@@ -150,16 +170,21 @@ class Geometry {
         cells.splice(cells.indexOf(obj), 1);
     }
     draw (obj = this, scale = false) {
-        obj.x += obj.vx;
-        obj.y += obj.vy;
+        // debugger
+        // may be used for later performance
+        // not to draw outside the player's view
+        // if (!RectCircleColliding({obj}, {x: 0, y: 0, w: cw, h: ch}))
+        //     return;
+        // obj.x += obj.vx;
+        // obj.y += obj.vy;
         if (obj.vx > 0) obj.vx-=.2;
         else if (obj.vx < 0) obj.vx += .2;
         if (obj.vy > 0) obj.vy-=.2;
         else if (obj.vy < 0) obj.vy += .2;
         save();
         translate(-scene.camera.x+obj.x, -scene.camera.y+obj.y);
-        rotate(obj.angle);
-        if (scale) {
+        !performance && obj.type !== 'attacker' && rotate(obj.angle);
+        if (!performance && scale) {
             ctx.scale(obj.scale, obj.scale);
         }
         ctx.strokeWidth = 4;
@@ -249,6 +274,7 @@ class Geometry {
             closePath();
         }
         else if (obj.type == 'attacker') {
+            rotate(obj.angle)
             beginPath();
             ctx.fillStyle = 'rgb(252, 118, 119)';
             moveTo(-obj.r, -obj.r);
@@ -259,12 +285,14 @@ class Geometry {
             ctx.fillStyle = '#000';
             closePath();
         }
-        if (!scale)
+        if (!scale && !performance)
             stroke();
         restore();
         // obj.drawHealth();
-        obj.angle += .01 * obj.direction;
-        if (obj.angle >= 360) obj.angle = 0; 
+        if (!performance) {
+            obj.angle += .01 * obj.direction;
+            if (obj.angle >= 360) obj.angle = 0; 
+        }
     }
 }
 
@@ -284,12 +312,12 @@ function drawHealth(obj) {
         width = wholeWidth;
         return;
     }
-    beginPath();
+    // beginPath();
     ctx.fillStyle = '#000';
     fillRect(x-w/2-5 - scene.camera.x, y + h+3 - scene.camera.y, w+10, 5);
     ctx.fillStyle = 'lime';
     fillRect(x-w/2-4 - scene.camera.x, y + h+4 - scene.camera.y, width, 3);
-    closePath();
+    // closePath();
 }
 
 const scene = new Scene();
@@ -301,7 +329,7 @@ function drawCastle() {
     let {x, y, side} = castle;
     let halfSide = side/2;
     beginPath();
-    save();
+    !performance && save();
     translate(-halfSide-scene.camera.x, -halfSide-scene.camera.y);
     lineTo(x , y - halfSide);
     lineTo(x + side/4, y);
@@ -312,13 +340,20 @@ function drawCastle() {
     lineTo(x + side ,y + side);
     lineTo(x, y + side);
     lineTo(x, y);
+    lineTo(x, y-25)
     // lineTo(x + side,y);
-    ctx.strokeStyle = "purpule";
-    ctx.fillStyle = '#000';
-    fill();
-    // stroke();
+    if (performance) {
+        stroke();
+    } else {
+        ctx.fillStyle = '#000';
+        fill();
+        ctx.strokeWidth = 8;
+        ctx.strokeStyle = "purple";
+    }
     closePath();
-    restore();
+    if (performance) {
+        translate(halfSide+scene.camera.x, halfSide+scene.camera.y);
+    } else restore();
     // if (castle.health < castle.maxHealth) {
         // drawHealth(castle);
     // }
@@ -350,8 +385,10 @@ function game () {
         return;
     }
     scene.clear();
-    ctx.fillStyle = `rgba(33, 33, 33, ${opacity})`;
-    fillRect(0, 0, cw, ch);
+    if (!performance) {
+        ctx.fillStyle = `rgba(33, 33, 33, ${opacity})`;
+        fillRect(0, 0, cw, ch);
+    }
     drawHealth(castle);
     drawCastle();
     // draws power stations

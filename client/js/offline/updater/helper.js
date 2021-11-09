@@ -78,6 +78,7 @@ function isOutOfBox(obj) {
 
 function updateLevel(player) {
     // 2 is the number of levels required each time to get a new upgrade
+    if (!player || !player.classPath) return;
     if (player.level > player.classPath.length * 2) {
         player.availableClasses = {};
         let tmp = classStructure;

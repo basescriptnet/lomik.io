@@ -31,13 +31,23 @@ window.Tank = class Tank {
         this.levelSettings = levelSettings;
         this.level = 0;
         this.score = score|0;
+        let d = 'dodgerblue';
+        let b = 'blue';
+        this.skin = [
+            [b, b, d, b, b],
+            [b, d, d, d, b],
+            [d, d, d, d, d],
+            [b, d, d, d, b],
+            [b, b, d, b, b],
+        ];
+        
         this.buttons = {
             c: false,
             e: false
         };
         this.guns = [{
             x: 0,
-            y: -this.r / 2,
+            y: -this.r / 2,  // ! fix it.
             r: 5,
             width: 30,
             height: 8,
@@ -153,7 +163,7 @@ window.Tank = class Tank {
         this.lastShootTime = now;
         let guns = this.guns;
         let bulletSpeed = this.bulletSpeed;
-        let spread = this.spread;
+        let spread = this.spread || [0, 0];
         let tankAngle = this.angle;
 // debugger
         for (let j = 0, len = guns.length; j < len; j++) {

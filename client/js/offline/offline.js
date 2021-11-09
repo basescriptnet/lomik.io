@@ -82,6 +82,7 @@ function update (obj) {
         let availableClassTouch = (ex, ey, execute) => {
             let player = players[sock.id];
             if (!player) return;
+            if (!player.availableClasses) player.availableClasses = {};
             if (Object.keys(player.availableClasses).length > 0) {
                 // let ex = po;
                 // let ey = y;
@@ -95,7 +96,7 @@ function update (obj) {
                         && ey > y
                         && ey < y + 70)
                     {
-                        debugger
+                        // debugger
                         if (execute) changeTank(i);
                         return true;
                     }
@@ -111,23 +112,55 @@ function update (obj) {
             return false;
         };
 
+        let updatesTouch = (ex, ey) => {
+            // let div = document.createElement('div');
+            // div.style = `position: absolute; top: ${ey-5}px; left: ${ex-5}px; border-radius: 50%; width: 10px; height: 10px; background: #333;`;
+            // document.body.append(div);
+            let x = 170,
+                y = ch - 130,
+                w = 21.5,
+                h = 10,
+                u = players['offline'].upgradedNTimes;
+                // debugger
+            if (u[8] === 0) return;
+            
+            for (let i in u) {
+                if (i == u.length-1) break;
+                // console.log({x: ex, y: ey, r: 10}, {x, y, w, h})
+                
+                // let div = document.createElement('div');
+                // div.style = `position: absolute; top: ${y}px; left: ${x}px; width: ${w}px; height: ${h}px; background: red;`;
+                // document.body.append(div);
+                if (RectCircleColliding({x: ex, y: ey, r: 10}, {x, y, w, h})) {
+                    // debugger
+                    players['offline'].upgrade(players['offline'], +i+1);
+                    return true
+                }
+                y += 15;
+            }
+        }
+
         let rotatedLastTime = 0;
 
 
         // if (globalThis.mobile) {
             
         // }
+        window.onresize = function () {
+            scene.resize();
+        }
         // Set up touch events for mobile, etc
         canvas.addEventListener("touchstart", function (e) {
-            if (!mobile) return;
             e.preventDefault();
-            availableClassTouch(e.touches[0].clientX, e.touches[0].clientY, true);
+            if (availableClassTouch(e.touches[0].clientX, e.touches[0].clientY, true)) return;
+            if (updatesTouch(e.touches[0].clientX, e.touches[0].clientY)) return;
             // mousePos = getTouchPos(canvas, e);
             if (now < rotatedLastTime + 30) return;
+            if (!mobile) return;
             let touch = e.touches[0];
-            if (touch.clientX < 240 && touch.clientY < 270) {
+            // if (touch.clientX < 240 && touch.clientY < 270) {
                 
-            };
+            // };
             if (touch.clientX > cw/2) {
                 // debugger
                 let mouseEvent = new MouseEvent("mousedown", {
@@ -252,6 +285,7 @@ function update (obj) {
 
         canvas.addEventListener('mousedown', e => {
             availableClassTouch(e.clientX, e.clientY, true)
+            updatesTouch(e.clientX, e.clientY);
             // let player = players[sock.id];
             // if (!player) return;
             // if (Object.keys(player.availableClasses).length > 0) {
@@ -289,11 +323,11 @@ function update (obj) {
         canvas.addEventListener('keyup', e => Tank.prototype.moveHandler(players[sock.id], e));
         canvas.addEventListener('keypress', e => Tank.prototype.keyHandler(players[sock.id], e));
         requestAnimationFrame(game);
-        window.addEventListener('blur', () => paused = true);
-        window.addEventListener('focus', () => {
-            paused = false;
-            requestAnimationFrame(game);
-        });
+        // window.addEventListener('blur', () => paused = true);
+        // window.addEventListener('focus', () => {
+        //     paused = false;
+        //     requestAnimationFrame(game);
+        // });
         // window.addEventListener('close', () => sock.emit('disconnect'));
     };
 

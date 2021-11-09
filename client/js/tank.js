@@ -45,6 +45,7 @@ class Tank {
         this.reloadDelay = 500;
         this.canShoot = true;
         this.bullets = [];
+        this.spread = [0, 0];
         this.lastShootTime = 0;
         this.isMoving = false;
         this.moveButtons = {
@@ -569,10 +570,12 @@ class Tank {
             let mx = x;
             ctx.fillStyle = '#000';
             let mw = w/7;
-            for (let j = 0; j < 7; j++) {
+            for (let j = 0; j < 8; j++) {
                 strokeRect(mx, y, mw-1, h-1);
                 mx += mw;
             }
+            // ctx.fillStyle = 'dodgerblue';
+            fillText('+', mx - mw*4/6, y + 8)
             y += 15;
         }
         
@@ -646,7 +649,7 @@ class Tank {
             cameraX = 0;
             cameraY = 0;
         }
-        let twoPI = 6.3; // 2*Math.PI
+        let twoPI = 6.3; // ~~2*Math.PI
         ctx.fillStyle = 'red';
         if (!isFake && obj.bullets instanceof Array) {
             for (let i of obj.bullets) {
@@ -658,14 +661,14 @@ class Tank {
                     ctx.arc(i.x - cameraX, i.y - cameraY, i.r, 0, twoPI, false);
                 ctx.lineWidth = 1;
                 stroke();
-                fill();
+                !performance && fill();
                 closePath();
             }
         }
         
         save();
         translate(obj.x - cameraX, obj.y - cameraY);
-        rotate(obj.angle);
+        !isFake && rotate(obj.angle);
         
         for (let i of obj.guns) {
             if (i.points) {
@@ -678,8 +681,10 @@ class Tank {
                     else 
                         lineTo(p[0], p[1]);
                 }
-                ctx.fillStyle = 'grey';
-                fill();
+                if (!performance) {
+                    ctx.fillStyle = 'grey';
+                    fill();
+                }
                 stroke();
                 closePath();
                 // continue;
@@ -688,9 +693,11 @@ class Tank {
                 save()
                 rotate(i.angle);
                 let positions = [i.x, i.y, i.width, i.height];
-                ctx.fillStyle = 'grey';
-                fillRect(...positions)
-                ctx.fillStyle = '#000';
+                if (!performance) {
+                    ctx.fillStyle = 'grey';
+                    fillRect(...positions)
+                }
+                // ctx.fillStyle = '#000';
                 strokeRect(...positions);
                 restore();
             }
@@ -701,8 +708,24 @@ class Tank {
         ctx.arc(0, 0, obj.r, 0, twoPI, false);
         ctx.lineWidth = 3;
         stroke();
-        ctx.fillStyle = obj.color;
-        fill();
+        if (!performance) {
+            ctx.clip();
+            // fill();
+            ctx.fillStyle = obj.color;
+            let skin = obj.skin;
+            let r = obj.r/2;
+            translate(-obj.r-2.5, -obj.r-2.5)
+            // draw skins
+            if (skin) {
+                for(let i = 0; i < skin.length; i++) {
+                    for(let j = 0; j < skin[i].length; j++) {
+                        ctx.fillStyle = skin[i][j];
+                        if (!skin[i][j]) continue;
+                        fillRect(r * i, r * j, +r.toFixed(1), +r.toFixed(1))
+                    }
+                }
+            }
+        }
         closePath();
         restore();
     }

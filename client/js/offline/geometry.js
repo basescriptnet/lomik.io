@@ -80,8 +80,8 @@ window.Geometry = class Geometry {
         this.scale = 1;
     }
     recalculate () {
-        this.x += this.vx;
-        this.y += this.vy;
+        // this.x += this.vx;
+        // this.y += this.vy;
         if (this.x <= 0) this.x = 0;
         else if (this.x >= 900) this.x = 900;
         if (this.y <= 0) this.y = 0;
@@ -91,8 +91,10 @@ window.Geometry = class Geometry {
         else if (this.vx < 0) this.vx += .2;
         if (this.vy > 0) this.vy-=.2;
         else if (this.vy < 0) this.vy += .2;
-        this.angle += .01 * this.direction;
-        if (this.angle >= 360) this.angle = 0; 
+        if (!performance) {
+            this.angle += .01 * this.direction;
+            if (this.angle >= 360) this.angle = 0; 
+        }
     }
     attack (destination = players) {
         // if (destination && destination[0] && !destination[0].isPlayer) debugger

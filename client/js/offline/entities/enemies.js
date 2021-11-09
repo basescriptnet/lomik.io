@@ -6,6 +6,16 @@ global.Enemy = class Enemy extends Tank {
         this.id = Math.random().toString(16).substr(2, 8); // generates a random String
         this.isPlayer = false;
         this.isEnemy = true;
+        
+        let d = 'red';
+        let b = 'purple';
+        this.skin = [
+            [d, b, b, b, d],
+            [d, b, b, b, d],
+            [b, d, b, d, b],
+            [b, b, d, b, b],
+            [b, b, d, b, b],
+        ];
         // check if chosen position collides with the player
         // let collision;
         // do {
@@ -44,6 +54,16 @@ global.Enemy = class Enemy extends Tank {
 
         if (boss) {
             this.color = 'yellow';
+            
+            let d = 'yellow';
+            let b = 'purple';
+            this.skin = [
+                [d, b, b, b, d],
+                [d, b, b, b, d],
+                [b, d, b, d, b],
+                [b, b, d, b, b],
+                [b, b, d, b, b],
+            ];
             this.reloadDelay = 700; // default
             this.maxHealth = this.health = this.maxHealth * 3;
             this.r = 20;
@@ -139,7 +159,6 @@ global.Enemy = class Enemy extends Tank {
         this.x += ~~vx|0;
         this.y += ~~vy|0;
     }
-    
 }
 
 window.checkEnemies = function checkEnemies () {

@@ -6,6 +6,7 @@
 // const classes = require('./classes');
 // let { checkCells, checkPlayers, checkEnemies } = require('./entities');
 castle = new Castle();
+let nightCount = 0;
 const modeInterval = {
     easy: {
         firstNight: 10e3,
@@ -40,7 +41,7 @@ let nightInterval = null;
 let isGameOver = false;
 
 let reset = () => {
-    window.players = {offline: new Tank('offline')};
+    window.players = {offline: new window.Tank('offline', 0)};
     isNight = false;
     castle = new Castle();
     isGameOver = false;
@@ -61,11 +62,19 @@ let reset = () => {
 
     nightInterval = setInterval(() => {
         isNight = !isNight;
+        isNight && nightCount++;
         if (!isNight) return; 
         if (enemies.length > 5) return;
             
+        if (nightCount % 10 === 0) {
+            enemies.push(new Enemy(true));
+        }
+        if (nightCount % 3 === 0) {
+            if (enemyAmount < 10) 
+                enemyAmount++;
+        }
         // if (enemyAmount < 5) Math.random() > .85 ? enemyAmount++ : null;
-        for (let i = 0; i < playersLength * enemyAmount; i++) {
+        for (let i = 0; i < enemyAmount; i++) {
             let enemyClass;
             switch (random(0, 10)) {
                 case 1:
@@ -92,7 +101,6 @@ let reset = () => {
                     break;
             }
             let enemy = new Enemy();
-            // let boss = new Enemy(true);
             // if (n <= 4) {
             //     enemyClass = 'sniper';
             // } else if (n >= 4 && n <= 6) {
@@ -106,85 +114,72 @@ let reset = () => {
             // classes.call(boss, 'boss', boss);
             enemy.reloadDelay *= 1.3;
             enemies.push(enemy);
-            // enemies.push(boss);
         }
         window.Geometry.prototype.createCell('attacker', playersLength, true);
-    }, 10e3);
+    }, 15e3);
     castle.aliveFrom = Date.now();
     castle.dead = false;
 };
 
 let connect = () => {
 // io.on('connection', sock => {
-    players[sock.id] = new Tank(sock.id);
+    players[sock.id] = new window.Tank(sock.id, 0);
     clients[sock.id] = false;
-    playersLength++;
-
-    // if the first player joined, run the loop
-    if (playersLength === 1) {
-        reset();
-        // enemies.push(new Enemy());
-        let opacity = 0;
-        let newGameIn = 0;
-        intervalId = setInterval(() => {
-            now = Date.now();
-            if (isGameOver) {
-                io.emit('update', {objects: {
-                    seconds: ~~((newGameIn - now)/1000),
-                    castle
-                }});
+    reset();
+    // enemies.push(new Enemy());
+    let opacity = 0;
+    let newGameIn = 0;
+    intervalId = setInterval(() => {
+        now = Date.now();
+        if (isGameOver) {
+            // io.emit('update', {objects: {
+            //     seconds: ~~((newGameIn - now)/1000),
+            //     castle
+            // }});
+            seconds = ~~((newGameIn - now)/1000);
+            if (now > newGameIn) {
+                clearInterval(intervalId);
+                clearInterval(nightInterval);
+                reset();
+            }
+            return;
+        };
+        // gets lightweight variant of players object, so you can update it faster
+        let updatedPlayers;
+        try {
+            updatedPlayers = checkPlayers();
+            // enemies
+            checkEnemies();
+            checkCells();
+            Collision.castleCollision();
+            if (castle.health <= 0) {
+                isGameOver = true;
+                castle.lastedUntil = now;
+                // debugger
+                newGameIn = now+5e3;
+                clearInterval(intervalId);
+                clearInterval(nightInterval);
+                setTimeout(connect, 5e3);
                 return;
-            };
-            // gets lightweight variant of players object, so you can update it faster
-            let updatedPlayers;
-            try {
-                updatedPlayers = checkPlayers();
-                // enemies
-                checkEnemies();
-                checkCells();
-                Collision.castleCollision();
-                if (castle.health <= 0) {
-                    isGameOver = true;
-                    castle.lastedUntil = now;
-                    newGameIn = now+5e3;
-                    // clearInterval(intervalId);
-                    clearInterval(nightInterval);
-                    setTimeout(reset, 5e3);
-                    return;
-                }
-                regen(castle);
-
-                if (!isNight) opacity -= 0.02;
-                else opacity += 0.02;
-                if (opacity > .5) opacity = .5;
-                else if (opacity < 0) opacity = 0;
-
-                // io.emit('update', {objects: {
-                //     players: updatedPlayers,
-                //     cells, enemies, isNight, castle, opacity
-                // }});
             }
-            catch (err) {
-                console.log(err);
-            }
-        }, 1000/60);
-    }
-    // console.log(`${sock.id} connected!`);
+            regen(castle);
+
+            if (!isNight) opacity -= 0.02;
+            else opacity += 0.02;
+            if (opacity > .5) opacity = .5;
+            else if (opacity < 0) opacity = 0;
+
+            // io.emit('update', {objects: {
+            //     players: updatedPlayers,
+            //     cells, enemies, isNight, castle, opacity
+            // }});
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }, 1000/60);
 }
-connect()
-    // sock.on('disconnect', function () {
-    //     // console.log(`${sock.id} disconnect!`);
-    
-    //     delete clients[sock.id];
-    //     delete players[sock.id];
-    //     playersLength--;
-    //     if (playersLength === 0) {
-    //         clearInterval(intervalId);
-    //         clearInterval(nightInterval);
-    //         cells = [];
-    //         enemies = [];
-    //     }
-    // });
+connect();
 
     sock.on('rotate', function (obj) {
         let player = players[sock.id];

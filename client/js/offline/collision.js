@@ -43,10 +43,12 @@ window.Collision = {
                             updateScore(obj, cell.type);
                         } else if (cell.isPlayer) { // player
                             cell.lastDamaged = now;
-                            io.emit('update', {objects: {
-                                seconds: now + 5e3,
-                                player: cell.simplify
-                            }});
+                            // io.emit('update', {objects: {
+                            //     seconds: now + 5e3,
+                            //     player: cell.simplify
+                            // }});
+                            seconds = now + 5e3;
+                            player = cell;
                         } else if (cells.length) {
                             setTimeout(() => {
                                 window.Geometry.prototype.createCell('any', 1, true);
@@ -55,8 +57,8 @@ window.Collision = {
                         }
                         return;
                     }
-                    else cell.lastDamaged = now;
-                    let vx, vy;
+                    cell.lastDamaged = now;
+                    let vx = 0, vy = 0;
                     if (bullet.speedX < 0) {
                         vx = -1;
                     }
@@ -69,10 +71,13 @@ window.Collision = {
                     else if (bullet.speedY > 0) {
                         vy = 1;
                     }
-                    cell.vx = 2 * vx|0;
-                    cell.vy = 2 * vy|0;
-                    cell.x += cell.vx;
-                    cell.y += cell.vy;
+                    // cell.vx = 2 * vx;
+                    // cell.vy = 2 * vy;
+                    cell.x += vx * 7;
+                    cell.y += vy * 7;
+                // } else {
+                //     cell.vx = 0;
+                //     cell.vy = 0;
                 }
             }
             for (let j = 0, len = enemies.length; j < len; j++) {

@@ -3,7 +3,7 @@ window.checkCells = function checkCells () {
         let i = cells[j];
         if (i.dead) {
             i.scale += .1;
-            if (i.scale >= 2)
+            if (performance || i.scale >= 2)
                 cells.splice(j, 1);
                 len--;
             continue;

@@ -2,24 +2,25 @@
 
 window.checkPlayers = function checkPlayers () {
     let updatedPlayers = {};
-    for (let i in players) {
-        let player = players[i];
-        if (clients[i]) continue;
+    // for (let i in players) {
+        let player = players['offline'];
+        // if (clients[i]) continue;
         if (!player) {
-            continue;
+            return;
         }
         else if (player.dead && player.lastDamaged + 5e3 > now) {
-            updatedPlayers[player.id] = player.simplify;
-            io.emit('update', {objects: {
-                player: player.simplify
-            }});
-            continue;
+            updatedPlayers[player.id] = player
+            // io.emit('update', {objects: {
+            //     player: player.simplify
+            // }});
+            // player = player.simplify
+            return;
         } else if (player.dead) {
             let id = player.id;
-            players[id] = new Tank(id, ~~player.score/2)
+            players[id] = new window.Tank(id, ~~player.score/2)
             updateScore(players[id])
             updateLevel(players[id])
-            continue;
+            return;
         }
         let level = player.level;
         Collision.bulletCollision(player, cells);
@@ -72,7 +73,7 @@ window.checkPlayers = function checkPlayers () {
             }
         }
         move(player);
-        updatedPlayers[player.id] = player.simplify;
-    }
+        updatedPlayers[player.id] = player;
+    // }
     return updatedPlayers;
 }
